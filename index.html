@@ -75,22 +75,40 @@
             color: rgba(255, 255, 255, 0.8);
         }
 
-        .gifts-count {
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .ton-balance {
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-        }
-
         .search-icon {
             width: 24px;
             height: 24px;
             color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Баланс блок */
+        .balance-container {
+            background: rgba(45, 55, 72, 0.8);
+            border-radius: 20px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .balance-display {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .gifts-count {
+            color: #ffd700;
+        }
+
+        .separator {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .ton-balance {
+            color: #4a9eff;
         }
 
         /* Основная рулетка */
@@ -200,6 +218,14 @@
             box-shadow: 0 6px 25px rgba(255, 215, 0, 0.5);
         }
 
+        .add-gifts-btn:disabled {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.5);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
         .add-ton-btn {
             background: rgba(255, 255, 255, 0.15);
             color: rgba(255, 255, 255, 0.9);
@@ -215,6 +241,121 @@
 
         .add-ton-btn:hover {
             background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Инвентарь */
+        .inventory-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+            backdrop-filter: blur(5px);
+        }
+
+        .inventory-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #0d1421;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .inventory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .inventory-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .inventory-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .inventory-content {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .empty-inventory {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .search-icon-large {
+            font-size: 80px;
+            color: rgba(255, 255, 255, 0.3);
+            margin-bottom: 10px;
+        }
+
+        .empty-message {
+            font-size: 24px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .empty-submessage {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 5px;
+        }
+
+        .transfer-link {
+            color: #4a9eff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .inventory-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .inventory-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .send-gifts-btn {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .go-shop-btn {
+            background: rgba(255, 255, 255, 0.9);
+            color: #0d1421;
         }
 
         /* Нижняя секция */
@@ -259,6 +400,7 @@
             text-decoration: none;
             transition: color 0.3s ease;
             padding: 8px;
+            cursor: pointer;
         }
 
         .nav-item.active {
@@ -314,10 +456,18 @@
         <div class="header">
             <div class="header-left">
                 <div class="menu-icon">⏰</div>
-                <span class="gifts-count">1ГИФТ</span>
+                <span style="color: rgba(255,255,255,0.7); font-size: 14px;">179 онлайн</span>
             </div>
-            <span class="ton-balance">1.63 TON</span>
             <div class="search-icon">🔍</div>
+        </div>
+
+        <!-- Баланс -->
+        <div class="balance-container">
+            <div class="balance-display">
+                <span class="gifts-count" id="giftsBalance">0 ГИФТОВ</span>
+                <span class="separator">|</span>
+                <span class="ton-balance" id="tonBalance">0 TON</span>
+            </div>
         </div>
 
         <!-- Рулетка -->
@@ -333,7 +483,7 @@
 
         <!-- Кнопки -->
         <div class="buttons">
-            <button class="add-gifts-btn" onclick="addGifts()">
+            <button class="add-gifts-btn" id="addGiftsBtn" onclick="addGifts()">
                 + Добавить Гифты
             </button>
             <button class="add-ton-btn" onclick="addTon()">
@@ -350,26 +500,51 @@
 
             <!-- Нижняя навигация -->
             <div class="bottom-nav">
-                <a href="#" class="nav-item active">
+                <div class="nav-item active" onclick="showPvP()">
                     <div class="nav-icon">🎯</div>
                     <div class="nav-text">ПвП</div>
-                </a>
-                <a href="#" class="nav-item">
+                </div>
+                <div class="nav-item" onclick="showSolo()">
                     <div class="nav-icon">🎰</div>
                     <div class="nav-text">Соло</div>
-                </a>
-                <a href="#" class="nav-item">
+                </div>
+                <div class="nav-item" onclick="showInventory()">
                     <div class="nav-icon">📦</div>
                     <div class="nav-text">Инвентарь</div>
-                </a>
-                <a href="#" class="nav-item">
+                </div>
+                <div class="nav-item" onclick="showShop()">
                     <div class="nav-icon">🏪</div>
                     <div class="nav-text">Магазин</div>
-                </a>
-                <a href="#" class="nav-item">
+                </div>
+                <div class="nav-item" onclick="showEarnings()">
                     <div class="nav-icon">💰</div>
                     <div class="nav-text">Заработок</div>
-                </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Инвентарь (модальное окно) -->
+    <div class="inventory-overlay" id="inventoryOverlay">
+        <div class="inventory-container">
+            <div class="inventory-header">
+                <h2 class="inventory-title">Инвентарь</h2>
+                <button class="inventory-close" onclick="closeInventory()">×</button>
+            </div>
+            <div class="inventory-content">
+                <div class="empty-inventory">
+                    <div class="search-icon-large">🔍</div>
+                    <div class="empty-message">
+                        Гифтов пока нет.<br>
+                        Купи один в нашем<br>
+                        магазине или отправь<br>
+                        на <a href="#" class="transfer-link">@rolls_transfer</a>
+                    </div>
+                    <div class="inventory-buttons">
+                        <button class="inventory-btn send-gifts-btn">Отправить гифты</button>
+                        <button class="inventory-btn go-shop-btn" onclick="showShop()">Перейти в магазин</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -379,64 +554,55 @@
         window.Telegram = window.Telegram || {};
 
         window.Telegram.WebApp = {
-            initData: '',
-            initDataUnsafe: {},
-            version: '6.0',
-            platform: 'web',
+            initData: '', initDataUnsafe: {}, version: '6.0', platform: 'web',
             colorScheme: 'dark',
             themeParams: {
-                bg_color: '#0d1421',
-                text_color: '#ffffff',
-                hint_color: '#708499',
-                link_color: '#ff4500',
-                button_color: '#ff4500',
-                button_text_color: '#ffffff'
+                bg_color: '#0d1421', text_color: '#ffffff', hint_color: '#708499',
+                link_color: '#ff4500', button_color: '#ff4500', button_text_color: '#ffffff'
             },
-            isExpanded: true,
-            viewportHeight: window.innerHeight,
-            viewportStableHeight: window.innerHeight,
-            isClosingConfirmationEnabled: false,
-            headerColor: '#0d1421',
-            backgroundColor: '#0d1421',
+            isExpanded: true, viewportHeight: window.innerHeight,
+            viewportStableHeight: window.innerHeight, isClosingConfirmationEnabled: false,
+            headerColor: '#0d1421', backgroundColor: '#0d1421',
 
             ready: function() {
                 console.log('Telegram WebApp ready');
                 this.isRealTelegram = !!(window.TelegramWebviewProxy || window.external || window.parent !== window);
             },
-
             expand: function() {
                 console.log('Telegram WebApp expand');
                 if (this.isRealTelegram && window.TelegramWebviewProxy) {
                     window.TelegramWebviewProxy.postEvent('web_app_expand', '{}');
                 }
             },
-
             setHeaderColor: function(color) {
                 this.headerColor = color;
                 if (this.isRealTelegram && window.TelegramWebviewProxy) {
                     window.TelegramWebviewProxy.postEvent('web_app_set_header_color', JSON.stringify({color: color}));
                 }
             },
-
             setBackgroundColor: function(color) {
                 this.backgroundColor = color;
                 if (this.isRealTelegram && window.TelegramWebviewProxy) {
                     window.TelegramWebviewProxy.postEvent('web_app_set_background_color', JSON.stringify({color: color}));
                 }
             },
-
             showAlert: function(message, callback) {
                 if (this.isRealTelegram && window.TelegramWebviewProxy) {
                     window.TelegramWebviewProxy.postEvent('web_app_open_popup', JSON.stringify({
-                        title: 'Уведомление',
-                        message: message,
-                        buttons: [{type: 'ok'}]
+                        title: 'Уведомление', message: message, buttons: [{type: 'ok'}]
                     }));
                 } else {
                     alert(message);
                 }
                 if (callback) callback();
             }
+        };
+
+        // Игровые данные
+        let gameData = {
+            gifts: 7,
+            ton: 9.86,
+            inventory: []
         };
 
         // Инициализация
@@ -447,6 +613,7 @@
             window.Telegram.WebApp.setBackgroundColor('#0d1421');
 
             createStars();
+            updateBalance();
         });
 
         // Создание звезд
@@ -464,9 +631,31 @@
             }
         }
 
+        // Обновление баланса
+        function updateBalance() {
+            document.getElementById('giftsBalance').textContent = `${gameData.gifts} ГИФТОВ`;
+            document.getElementById('tonBalance').textContent = `${gameData.ton} TON`;
+
+            // Обновление кнопки добавления гифтов
+            const addGiftsBtn = document.getElementById('addGiftsBtn');
+            if (gameData.gifts === 0) {
+                addGiftsBtn.disabled = true;
+                addGiftsBtn.textContent = 'Нет гифтов в инвентаре';
+            } else {
+                addGiftsBtn.disabled = false;
+                addGiftsBtn.textContent = '+ Добавить Гифты';
+            }
+        }
+
         // Функции кнопок
         function addGifts() {
-            window.Telegram.WebApp.showAlert('Функция добавления гифтов в разработке!');
+            if (gameData.gifts > 0) {
+                gameData.gifts -= 1;
+                updateBalance();
+                window.Telegram.WebApp.showAlert(`Гифт добавлен в игру! Осталось: ${gameData.gifts} гифтов`);
+            } else {
+                window.Telegram.WebApp.showAlert('У вас нет гифтов в инвентаре! Купите в магазине или получите через @rolls_transfer');
+            }
         }
 
         function addTon() {
@@ -480,9 +669,39 @@
 
             setTimeout(() => {
                 roulette.classList.remove('spinning');
-                window.Telegram.WebApp.showAlert('Поздравляем! Вы выиграли приз!');
+                // Случайный приз
+                const prizes = ['Гифт!', 'TON!', 'Бонус!'];
+                const prize = prizes[Math.floor(Math.random() * prizes.length)];
+                window.Telegram.WebApp.showAlert(`Поздравляем! Вы выиграли: ${prize}`);
             }, 4000);
         }
+
+        // Инвентарь
+        function showInventory() {
+            document.getElementById('inventoryOverlay').style.display = 'block';
+            setActiveNav(2);
+        }
+
+        function closeInventory() {
+            document.getElementById('inventoryOverlay').style.display = 'none';
+        }
+
+        // Навигация
+        function setActiveNav(index) {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach((item, i) => {
+                if (i === index) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        function showPvP() { setActiveNav(0); }
+        function showSolo() { setActiveNav(1); window.Telegram.WebApp.showAlert('Соло режим в разработке!'); }
+        function showShop() { setActiveNav(3); window.Telegram.WebApp.showAlert('Магазин в разработке!'); }
+        function showEarnings() { setActiveNav(4); window.Telegram.WebApp.showAlert('Заработок в разработке!'); }
 
         // Клик по рулетке
         document.getElementById('roulette').addEventListener('click', spinRoulette);
