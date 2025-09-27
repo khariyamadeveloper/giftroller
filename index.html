@@ -20,7 +20,6 @@
             position: relative;
         }
 
-        /* Звезды на фоне */
         .stars {
             position: absolute;
             width: 100%;
@@ -52,7 +51,6 @@
             justify-content: space-between;
         }
 
-        /* Верхняя панель */
         .header {
             display: flex;
             justify-content: space-between;
@@ -87,7 +85,6 @@
             color: rgba(255, 255, 255, 0.8);
         }
 
-        /* Баланс блок */
         .balance-container {
             background: rgba(45, 55, 72, 0.8);
             border-radius: 20px;
@@ -117,7 +114,6 @@
             color: #4a9eff;
         }
 
-        /* Игровая информация */
         .game-info {
             background: rgba(25, 35, 50, 0.9);
             border-radius: 15px;
@@ -147,7 +143,6 @@
             color: rgba(255, 255, 255, 0.8);
         }
 
-        /* Основная рулетка */
         .roulette-container {
             position: relative;
             width: 300px;
@@ -159,19 +154,12 @@
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            background: conic-gradient(
-                from var(--rotation, 0deg),
-                #ff4500 0deg,
-                #ff6b35 120deg,
-                #ff4500 240deg,
-                #ff6b35 360deg
-            );
+            background: #ff4500;
             position: relative;
             transition: transform 4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             box-shadow: 0 0 50px rgba(255, 69, 0, 0.4);
         }
 
-        /* Центральный круг */
         .center-circle {
             position: absolute;
             top: 50%;
@@ -193,7 +181,6 @@
             line-height: 1.2;
         }
 
-        /* Указатель сверху */
         .pointer {
             position: absolute;
             top: -5px;
@@ -207,7 +194,6 @@
             z-index: 4;
         }
 
-        /* Аватар */
         .avatar {
             position: absolute;
             top: -20px;
@@ -230,7 +216,6 @@
             font-size: 18px;
         }
 
-        /* Кнопки */
         .buttons {
             display: flex;
             flex-direction: column;
@@ -270,139 +255,6 @@
             box-shadow: none;
         }
 
-        .add-ton-btn {
-            background: rgba(255, 255, 255, 0.15);
-            color: rgba(255, 255, 255, 0.9);
-            padding: 16px 24px;
-            border: none;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        .add-ton-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-        }
-
-        /* Инвентарь */
-        .inventory-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            display: none;
-            backdrop-filter: blur(5px);
-        }
-
-        .inventory-container {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #0d1421;
-            border-radius: 20px 20px 0 0;
-            padding: 20px;
-            max-height: 80vh;
-            overflow-y: auto;
-            border-top: 2px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .inventory-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .inventory-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: white;
-        }
-
-        .inventory-close {
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 24px;
-            cursor: pointer;
-            padding: 5px;
-        }
-
-        .inventory-content {
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .empty-inventory {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .search-icon-large {
-            font-size: 80px;
-            color: rgba(255, 255, 255, 0.3);
-            margin-bottom: 10px;
-        }
-
-        .empty-message {
-            font-size: 24px;
-            font-weight: 600;
-            color: white;
-            margin-bottom: 10px;
-            line-height: 1.3;
-        }
-
-        .empty-submessage {
-            font-size: 16px;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 5px;
-        }
-
-        .transfer-link {
-            color: #4a9eff;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .inventory-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 30px;
-        }
-
-        .inventory-btn {
-            flex: 1;
-            padding: 15px;
-            border: none;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .send-gifts-btn {
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-        }
-
-        .go-shop-btn {
-            background: rgba(255, 255, 255, 0.9);
-            color: #0d1421;
-        }
-
-        /* Нижняя секция */
         .bottom-section {
             width: 100%;
             max-width: 400px;
@@ -428,7 +280,6 @@
             color: rgba(255, 255, 255, 0.6);
         }
 
-        /* Нижняя навигация */
         .bottom-nav {
             display: flex;
             justify-content: space-around;
@@ -465,7 +316,6 @@
             font-weight: 500;
         }
 
-        /* Анимация вращения */
         .spinning {
             animation: spin 4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
@@ -474,100 +324,74 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(var(--spin-degrees, 1800deg)); }
         }
-
-        /* Адаптивность */
-        @media (max-width: 400px) {
-            .container {
-                padding: 15px;
-            }
-
-            .roulette-container {
-                width: 280px;
-                height: 280px;
-            }
-
-            .buttons {
-                max-width: 320px;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="stars"></div>
 
     <div class="container">
-        <!-- Верхняя панель -->
         <div class="header">
             <div class="header-left">
                 <div class="menu-icon">⏰</div>
-                <span class="online-counter" id="onlineCounter">● 0 онлайн</span>
+                <span class="online-counter" id="onlineCounter">● 1 онлайн</span>
             </div>
             <div class="search-icon">🔍</div>
         </div>
 
-        <!-- Баланс -->
         <div class="balance-container">
             <div class="balance-display">
                 <span class="gifts-count" id="giftsBalance">7 ГИФТОВ</span>
                 <span class="separator">|</span>
-                <span class="ton-balance" id="tonBalance">9.86 TON</span>
+                <span class="ton-balance" id="tonBalance">0 TON</span>
             </div>
         </div>
 
-        <!-- Игровая информация -->
         <div class="game-info">
             <div class="bank-total" id="bankTotal">Банк: 0 TON</div>
             <div class="timer" id="gameTimer">Ожидание игроков...</div>
             <div class="participants" id="participantsInfo">Ваш шанс: 0%</div>
         </div>
 
-        <!-- Рулетка -->
         <div class="roulette-container">
             <div class="avatar">
                 <div class="avatar-icon">👤</div>
             </div>
             <div class="pointer"></div>
             <div class="roulette-wheel" id="roulette">
-                <div class="center-circle" id="centerText">Ожидание<br>игроков</div>
+                <div class="center-circle" id="centerText">Ожидание<br>реальных<br>игроков</div>
             </div>
         </div>
 
-        <!-- Кнопки -->
         <div class="buttons">
             <button class="add-gifts-btn" id="addGiftsBtn" onclick="addGifts()">
                 + Добавить Гифты
             </button>
-            <button class="add-ton-btn" onclick="addTon()">
-                Добавить 0 TON
-            </button>
         </div>
 
-        <!-- Нижняя информация -->
         <div class="bottom-section">
             <div class="players-info">
                 <span class="players-count" id="playersCount">Игроков (0)</span>
                 <span class="game-id" id="gameId">ИГРА #45009</span>
             </div>
 
-            <!-- Нижняя навигация -->
             <div class="bottom-nav">
-                <div class="nav-item active" onclick="showPvP()">
+                <div class="nav-item active">
                     <div class="nav-icon">🎯</div>
                     <div class="nav-text">ПвП</div>
                 </div>
-                <div class="nav-item" onclick="showSolo()">
+                <div class="nav-item">
                     <div class="nav-icon">🎰</div>
                     <div class="nav-text">Соло</div>
                 </div>
-                <div class="nav-item" onclick="showInventory()">
+                <div class="nav-item">
                     <div class="nav-icon">📦</div>
                     <div class="nav-text">Инвентарь</div>
                 </div>
-                <div class="nav-item" onclick="showShop()">
+                <div class="nav-item">
                     <div class="nav-icon">🏪</div>
                     <div class="nav-text">Магазин</div>
                 </div>
-                <div class="nav-item" onclick="showEarnings()">
+                <div class="nav-item">
                     <div class="nav-icon">💰</div>
                     <div class="nav-text">Заработок</div>
                 </div>
@@ -575,97 +399,28 @@
         </div>
     </div>
 
-    <!-- Инвентарь -->
-    <div class="inventory-overlay" id="inventoryOverlay">
-        <div class="inventory-container">
-            <div class="inventory-header">
-                <h2 class="inventory-title">Инвентарь</h2>
-                <button class="inventory-close" onclick="closeInventory()">×</button>
-            </div>
-            <div class="inventory-content">
-                <div class="empty-inventory">
-                    <div class="search-icon-large">🔍</div>
-                    <div class="empty-message">
-                        Гифтов пока нет.<br>
-                        Купи один в нашем<br>
-                        магазине или отправь<br>
-                        на <a href="#" class="transfer-link">@nereklama</a>
-                    </div>
-                    <div class="inventory-buttons">
-                        <button class="inventory-btn send-gifts-btn">Отправить гифты</button>
-                        <button class="inventory-btn go-shop-btn" onclick="showShop()">Перейти в магазин</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // Встроенный Telegram WebApp API
+        // Telegram WebApp API
         window.Telegram = window.Telegram || {};
-
         window.Telegram.WebApp = {
-            initData: '', initDataUnsafe: {}, version: '6.0', platform: 'web',
-            colorScheme: 'dark',
-            themeParams: {
-                bg_color: '#0d1421', text_color: '#ffffff', hint_color: '#708499',
-                link_color: '#ff4500', button_color: '#ff4500', button_text_color: '#ffffff'
-            },
-            isExpanded: true, viewportHeight: window.innerHeight,
-            viewportStableHeight: window.innerHeight, isClosingConfirmationEnabled: false,
-            headerColor: '#0d1421', backgroundColor: '#0d1421',
-
-            ready: function() {
-                console.log('Telegram WebApp ready');
-                this.isRealTelegram = !!(window.TelegramWebviewProxy || window.external || window.parent !== window);
-            },
-            expand: function() {
-                console.log('Telegram WebApp expand');
-                if (this.isRealTelegram && window.TelegramWebviewProxy) {
-                    window.TelegramWebviewProxy.postEvent('web_app_expand', '{}');
-                }
-            },
-            setHeaderColor: function(color) {
-                this.headerColor = color;
-                if (this.isRealTelegram && window.TelegramWebviewProxy) {
-                    window.TelegramWebviewProxy.postEvent('web_app_set_header_color', JSON.stringify({color: color}));
-                }
-            },
-            setBackgroundColor: function(color) {
-                this.backgroundColor = color;
-                if (this.isRealTelegram && window.TelegramWebviewProxy) {
-                    window.TelegramWebviewProxy.postEvent('web_app_set_background_color', JSON.stringify({color: color}));
-                }
-            },
-            showAlert: function(message, callback) {
-                if (this.isRealTelegram && window.TelegramWebviewProxy) {
-                    window.TelegramWebviewProxy.postEvent('web_app_open_popup', JSON.stringify({
-                        title: 'Уведомление', message: message, buttons: [{type: 'ok'}]
-                    }));
-                } else {
-                    alert(message);
-                }
-                if (callback) callback();
-            }
+            initData: '', version: '6.0', platform: 'web',
+            ready: function() { console.log('WebApp ready'); },
+            expand: function() { console.log('WebApp expand'); },
+            setHeaderColor: function(color) { console.log('Header color:', color); },
+            setBackgroundColor: function(color) { console.log('Background color:', color); },
+            showAlert: function(message) { alert(message); }
         };
 
-        // Игровые данные и логика
+        // Игровые данные (только для реальных игроков)
         let gameData = {
             gifts: 7,
-            ton: 9.86,
-            inventory: [],
-            currentGameId: 45009,
-            onlineUsers: 234,
+            ton: 0, // Убираем бесплатные TON
+            gameId: 45009,
+            onlineUsers: 1, // Реальный онлайн из Telegram
             gameBank: 0,
             players: [],
             gameTimer: 0,
-            gameInProgress: false,
             userBet: 0
-        };
-
-        let timers = {
-            gameTimer: null,
-            onlineUpdate: null
         };
 
         // Инициализация
@@ -677,9 +432,11 @@
 
             createStars();
             updateBalance();
-            updateOnlineCounter();
-            startOnlineUpdates();
-            simulateGameActivity();
+
+            // Запрашиваем реальные данные от бота
+            if (window.Telegram.WebApp.initData) {
+                fetchRealUserData();
+            }
         });
 
         // Создание звезд
@@ -697,65 +454,28 @@
             }
         }
 
-        // Обновление онлайн счетчика
-        function updateOnlineCounter() {
-            // Реальный показатель онлайна (колеблется от 180 до 350)
-            gameData.onlineUsers = Math.floor(Math.random() * 170) + 180;
-            document.getElementById('onlineCounter').textContent = `● ${gameData.onlineUsers} онлайн`;
-        }
-
-        function startOnlineUpdates() {
-            timers.onlineUpdate = setInterval(updateOnlineCounter, 15000); // Обновляем каждые 15 секунд
+        // Запрос реальных данных пользователя
+        function fetchRealUserData() {
+            // Отправляем запрос боту через Telegram WebApp API
+            if (window.Telegram.WebApp.sendData) {
+                window.Telegram.WebApp.sendData(JSON.stringify({
+                    action: 'get_user_data'
+                }));
+            }
         }
 
         // Обновление баланса
         function updateBalance() {
             document.getElementById('giftsBalance').textContent = `${gameData.gifts} ГИФТОВ`;
-            document.getElementById('tonBalance').textContent = `${gameData.ton} TON`;
+            document.getElementById('tonBalance').textContent = `${gameData.ton.toFixed(2)} TON`;
 
             const addGiftsBtn = document.getElementById('addGiftsBtn');
             if (gameData.gifts === 0) {
                 addGiftsBtn.disabled = true;
-                addGiftsBtn.textContent = 'Нет гифтов в инвентаре';
+                addGiftsBtn.textContent = 'Нет гифтов для ставки';
             } else {
                 addGiftsBtn.disabled = false;
                 addGiftsBtn.textContent = '+ Добавить Гифты';
-            }
-        }
-
-        // Добавление гифтов в игру
-        function addGifts() {
-            if (gameData.gifts > 0 && !gameData.gameInProgress) {
-                const giftValue = 1.0; // 1 гифт = 1 TON
-                gameData.gifts -= 1;
-                gameData.userBet += giftValue;
-                gameData.gameBank += giftValue;
-
-                // Добавляем игрока в список
-                if (!gameData.players.find(p => p.id === 'user')) {
-                    gameData.players.push({
-                        id: 'user',
-                        name: 'Вы',
-                        bet: 0
-                    });
-                }
-
-                const userPlayer = gameData.players.find(p => p.id === 'user');
-                userPlayer.bet += giftValue;
-
-                updateBalance();
-                updateGameInfo();
-
-                // Если это первая или вторая ставка, запускаем таймер
-                if (gameData.players.length === 2 && !gameData.gameInProgress) {
-                    startGameTimer();
-                }
-
-                window.Telegram.WebApp.showAlert(`Гифт добавлен! Ваша ставка: ${userPlayer.bet} TON`);
-            } else if (gameData.gameInProgress) {
-                window.Telegram.WebApp.showAlert('Дождитесь окончания текущей игры!');
-            } else {
-                window.Telegram.WebApp.showAlert('У вас нет гифтов в инвентаре!');
             }
         }
 
@@ -763,8 +483,9 @@
         function updateGameInfo() {
             document.getElementById('bankTotal').textContent = `Банк: ${gameData.gameBank.toFixed(2)} TON`;
             document.getElementById('playersCount').textContent = `Игроков (${gameData.players.length})`;
+            document.getElementById('onlineCounter').textContent = `● ${gameData.onlineUsers} онлайн`;
 
-            // Расчет шанса на победу
+            // Расчет шанса
             let userChance = 0;
             if (gameData.userBet > 0 && gameData.gameBank > 0) {
                 userChance = Math.round((gameData.userBet / gameData.gameBank) * 100);
@@ -772,152 +493,42 @@
             document.getElementById('participantsInfo').textContent = `Ваш шанс: ${userChance}%`;
         }
 
-        // Запуск игрового таймера
-        function startGameTimer() {
-            gameData.gameTimer = 30;
-            gameData.gameInProgress = true;
-
-            timers.gameTimer = setInterval(() => {
-                if (gameData.gameTimer > 0) {
-                    document.getElementById('gameTimer').textContent = `Розыгрыш через: ${gameData.gameTimer}с`;
-                    document.getElementById('centerText').innerHTML = `${gameData.gameTimer}с<br>до розыгрыша`;
-                    gameData.gameTimer--;
+        // Добавление гифтов (только реальные пользователи)
+        function addGifts() {
+            if (gameData.gifts > 0) {
+                if (window.Telegram.WebApp.sendData) {
+                    window.Telegram.WebApp.sendData(JSON.stringify({
+                        action: 'add_gift'
+                    }));
                 } else {
-                    clearInterval(timers.gameTimer);
-                    startRouletteSpin();
+                    // Fallback для тестирования
+                    gameData.gifts -= 1;
+                    gameData.userBet += 1.0;
+                    gameData.gameBank += 1.0;
+                    updateBalance();
+                    updateGameInfo();
+                    window.Telegram.WebApp.showAlert('Гифт добавлен! Ждем других игроков...');
                 }
-            }, 1000);
-        }
-
-        // Запуск рулетки
-        function startRouletteSpin() {
-            const roulette = document.getElementById('roulette');
-
-            // Определяем победителя на основе шансов
-            const winner = determineWinner();
-            const spinDegrees = 1800 + Math.random() * 720; // 5-7 оборотов
-
-            roulette.style.setProperty('--spin-degrees', spinDegrees + 'deg');
-            roulette.classList.add('spinning');
-
-            document.getElementById('centerText').innerHTML = 'Крутится...';
-            document.getElementById('gameTimer').textContent = 'Розыгрыш...';
-
-            setTimeout(() => {
-                roulette.classList.remove('spinning');
-                endGame(winner);
-            }, 4000);
-        }
-
-        // Определение победителя
-        function determineWinner() {
-            const random = Math.random();
-            let cumulative = 0;
-
-            for (let player of gameData.players) {
-                const chance = player.bet / gameData.gameBank;
-                cumulative += chance;
-                if (random <= cumulative) {
-                    return player;
-                }
-            }
-
-            return gameData.players[0]; // Fallback
-        }
-
-        // Завершение игры
-        function endGame(winner) {
-            const houseEdge = 0.05; // 5% комиссия
-            const winAmount = gameData.gameBank * (1 - houseEdge);
-
-            if (winner.id === 'user') {
-                gameData.ton += winAmount;
-                window.Telegram.WebApp.showAlert(`🎉 Вы выиграли ${winAmount.toFixed(2)} TON!`);
             } else {
-                window.Telegram.WebApp.showAlert(`😔 Выиграл ${winner.name} (${winAmount.toFixed(2)} TON)`);
+                window.Telegram.WebApp.showAlert('У вас нет гифтов! Получите их от других игроков.');
             }
-
-            // Сброс игры
-            resetGame();
-            updateBalance();
-            updateGameInfo();
-
-            // Новый номер игры
-            gameData.currentGameId += Math.floor(Math.random() * 10) + 1;
-            document.getElementById('gameId').textContent = `ИГРА #${gameData.currentGameId}`;
         }
 
-        // Сброс игры
-        function resetGame() {
-            gameData.gameBank = 0;
-            gameData.players = [];
-            gameData.userBet = 0;
-            gameData.gameInProgress = false;
-            gameData.gameTimer = 0;
-
-            document.getElementById('centerText').innerHTML = 'Ожидание<br>игроков';
-            document.getElementById('gameTimer').textContent = 'Ожидание игроков...';
+        // Обновление номера игры
+        function updateGameId() {
+            gameData.gameId += Math.floor(Math.random() * 10) + 1;
+            document.getElementById('gameId').textContent = `ИГРА #${gameData.gameId}`;
         }
 
-        // Симуляция активности других игроков
-        function simulateGameActivity() {
-            setInterval(() => {
-                if (!gameData.gameInProgress && Math.random() < 0.3) {
-                    // Добавляем ботов случайно
-                    const botNames = ['Алекс', 'Мария', 'Дмитрий', 'Анна', 'Сергей', 'Катя'];
-                    const botName = botNames[Math.floor(Math.random() * botNames.length)];
-                    const botBet = Math.random() * 5 + 0.5; // От 0.5 до 5.5 TON
-
-                    if (gameData.players.length < 8) {
-                        gameData.players.push({
-                            id: 'bot_' + Date.now(),
-                            name: botName,
-                            bet: botBet
-                        });
-
-                        gameData.gameBank += botBet;
-                        updateGameInfo();
-
-                        if (gameData.players.length === 2 && !gameData.gameInProgress) {
-                            startGameTimer();
-                        }
-                    }
-                }
-            }, Math.random() * 10000 + 5000); // Каждые 5-15 секунд
-        }
-
-        // Остальные функции (инвентарь, навигация и т.д.)
-        function addTon() {
-            window.Telegram.WebApp.showAlert('Функция добавления TON в разработке!');
-        }
-
-        function showInventory() {
-            document.getElementById('inventoryOverlay').style.display = 'block';
-            setActiveNav(2);
-        }
-
-        function closeInventory() {
-            document.getElementById('inventoryOverlay').style.display = 'none';
-        }
-
-        function setActiveNav(index) {
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach((item, i) => {
-                if (i === index) {
-                    item.classList.add('active');
-                } else {
-                    item.classList.remove('active');
-                }
-            });
-        }
-
-        function showPvP() { setActiveNav(0); }
-        function showSolo() { setActiveNav(1); window.Telegram.WebApp.showAlert('Соло режим в разработке!'); }
-        function showShop() { setActiveNav(3); window.Telegram.WebApp.showAlert('Магазин в разработке!'); }
-        function showEarnings() { setActiveNav(4); window.Telegram.WebApp.showAlert('Заработок в разработке!'); }
-
-        // Клик по рулетке (добавление ставки)
+        // Клик по рулетке
         document.getElementById('roulette').addEventListener('click', addGifts);
+
+        // Периодическое обновление онлайна (если есть связь с ботом)
+        setInterval(() => {
+            if (window.Telegram.WebApp.sendData) {
+                fetchRealUserData();
+            }
+        }, 30000); // Каждые 30 секунд
 
         // Попытка загрузить внешний Telegram API
         if (!window.TelegramWebviewProxy) {
@@ -927,8 +538,6 @@
                 if (window.Telegram && window.Telegram.WebApp) {
                     window.Telegram.WebApp.ready();
                     window.Telegram.WebApp.expand();
-                    window.Telegram.WebApp.setHeaderColor('#0d1421');
-                    window.Telegram.WebApp.setBackgroundColor('#0d1421');
                 }
             };
             document.head.appendChild(script);
