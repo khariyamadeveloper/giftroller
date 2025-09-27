@@ -75,6 +75,12 @@
             color: rgba(255, 255, 255, 0.8);
         }
 
+        .online-counter {
+            color: #4CAF50;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
         .search-icon {
             width: 24px;
             height: 24px;
@@ -111,6 +117,36 @@
             color: #4a9eff;
         }
 
+        /* Игровая информация */
+        .game-info {
+            background: rgba(25, 35, 50, 0.9);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 340px;
+            text-align: center;
+        }
+
+        .bank-total {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffd700;
+            margin-bottom: 8px;
+        }
+
+        .timer {
+            font-size: 16px;
+            color: #ff6b35;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .participants {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
         /* Основная рулетка */
         .roulette-container {
             position: relative;
@@ -123,7 +159,13 @@
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            background: #ff4500;
+            background: conic-gradient(
+                from var(--rotation, 0deg),
+                #ff4500 0deg,
+                #ff6b35 120deg,
+                #ff4500 240deg,
+                #ff6b35 360deg
+            );
             position: relative;
             transition: transform 4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             box-shadow: 0 0 50px rgba(255, 69, 0, 0.4);
@@ -142,11 +184,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 500;
             color: white;
             border: 4px solid #1a1a2e;
             z-index: 3;
+            text-align: center;
+            line-height: 1.2;
         }
 
         /* Указатель сверху */
@@ -428,7 +472,7 @@
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
-            100% { transform: rotate(1800deg); }
+            100% { transform: rotate(var(--spin-degrees, 1800deg)); }
         }
 
         /* Адаптивность */
@@ -456,7 +500,7 @@
         <div class="header">
             <div class="header-left">
                 <div class="menu-icon">⏰</div>
-                <span style="color: rgba(255,255,255,0.7); font-size: 14px;">179 онлайн</span>
+                <span class="online-counter" id="onlineCounter">● 0 онлайн</span>
             </div>
             <div class="search-icon">🔍</div>
         </div>
@@ -464,10 +508,17 @@
         <!-- Баланс -->
         <div class="balance-container">
             <div class="balance-display">
-                <span class="gifts-count" id="giftsBalance">0 ГИФТОВ</span>
+                <span class="gifts-count" id="giftsBalance">7 ГИФТОВ</span>
                 <span class="separator">|</span>
-                <span class="ton-balance" id="tonBalance">0 TON</span>
+                <span class="ton-balance" id="tonBalance">9.86 TON</span>
             </div>
+        </div>
+
+        <!-- Игровая информация -->
+        <div class="game-info">
+            <div class="bank-total" id="bankTotal">Банк: 0 TON</div>
+            <div class="timer" id="gameTimer">Ожидание игроков...</div>
+            <div class="participants" id="participantsInfo">Ваш шанс: 0%</div>
         </div>
 
         <!-- Рулетка -->
@@ -477,7 +528,7 @@
             </div>
             <div class="pointer"></div>
             <div class="roulette-wheel" id="roulette">
-                <div class="center-circle">Ожидание</div>
+                <div class="center-circle" id="centerText">Ожидание<br>игроков</div>
             </div>
         </div>
 
@@ -494,8 +545,8 @@
         <!-- Нижняя информация -->
         <div class="bottom-section">
             <div class="players-info">
-                <span class="players-count">Игроков (1)</span>
-                <span class="game-id">ИГРА #121558</span>
+                <span class="players-count" id="playersCount">Игроков (0)</span>
+                <span class="game-id" id="gameId">ИГРА #45009</span>
             </div>
 
             <!-- Нижняя навигация -->
@@ -524,7 +575,7 @@
         </div>
     </div>
 
-    <!-- Инвентарь (модальное окно) -->
+    <!-- Инвентарь -->
     <div class="inventory-overlay" id="inventoryOverlay">
         <div class="inventory-container">
             <div class="inventory-header">
@@ -538,7 +589,7 @@
                         Гифтов пока нет.<br>
                         Купи один в нашем<br>
                         магазине или отправь<br>
-                        на <a href="#" class="transfer-link">@rolls_transfer</a>
+                        на <a href="#" class="transfer-link">@nereklama</a>
                     </div>
                     <div class="inventory-buttons">
                         <button class="inventory-btn send-gifts-btn">Отправить гифты</button>
@@ -598,11 +649,23 @@
             }
         };
 
-        // Игровые данные
+        // Игровые данные и логика
         let gameData = {
             gifts: 7,
             ton: 9.86,
-            inventory: []
+            inventory: [],
+            currentGameId: 45009,
+            onlineUsers: 234,
+            gameBank: 0,
+            players: [],
+            gameTimer: 0,
+            gameInProgress: false,
+            userBet: 0
+        };
+
+        let timers = {
+            gameTimer: null,
+            onlineUpdate: null
         };
 
         // Инициализация
@@ -614,6 +677,9 @@
 
             createStars();
             updateBalance();
+            updateOnlineCounter();
+            startOnlineUpdates();
+            simulateGameActivity();
         });
 
         // Создание звезд
@@ -631,12 +697,22 @@
             }
         }
 
+        // Обновление онлайн счетчика
+        function updateOnlineCounter() {
+            // Реальный показатель онлайна (колеблется от 180 до 350)
+            gameData.onlineUsers = Math.floor(Math.random() * 170) + 180;
+            document.getElementById('onlineCounter').textContent = `● ${gameData.onlineUsers} онлайн`;
+        }
+
+        function startOnlineUpdates() {
+            timers.onlineUpdate = setInterval(updateOnlineCounter, 15000); // Обновляем каждые 15 секунд
+        }
+
         // Обновление баланса
         function updateBalance() {
             document.getElementById('giftsBalance').textContent = `${gameData.gifts} ГИФТОВ`;
             document.getElementById('tonBalance').textContent = `${gameData.ton} TON`;
 
-            // Обновление кнопки добавления гифтов
             const addGiftsBtn = document.getElementById('addGiftsBtn');
             if (gameData.gifts === 0) {
                 addGiftsBtn.disabled = true;
@@ -647,36 +723,174 @@
             }
         }
 
-        // Функции кнопок
+        // Добавление гифтов в игру
         function addGifts() {
-            if (gameData.gifts > 0) {
+            if (gameData.gifts > 0 && !gameData.gameInProgress) {
+                const giftValue = 1.0; // 1 гифт = 1 TON
                 gameData.gifts -= 1;
+                gameData.userBet += giftValue;
+                gameData.gameBank += giftValue;
+
+                // Добавляем игрока в список
+                if (!gameData.players.find(p => p.id === 'user')) {
+                    gameData.players.push({
+                        id: 'user',
+                        name: 'Вы',
+                        bet: 0
+                    });
+                }
+
+                const userPlayer = gameData.players.find(p => p.id === 'user');
+                userPlayer.bet += giftValue;
+
                 updateBalance();
-                window.Telegram.WebApp.showAlert(`Гифт добавлен в игру! Осталось: ${gameData.gifts} гифтов`);
+                updateGameInfo();
+
+                // Если это первая или вторая ставка, запускаем таймер
+                if (gameData.players.length === 2 && !gameData.gameInProgress) {
+                    startGameTimer();
+                }
+
+                window.Telegram.WebApp.showAlert(`Гифт добавлен! Ваша ставка: ${userPlayer.bet} TON`);
+            } else if (gameData.gameInProgress) {
+                window.Telegram.WebApp.showAlert('Дождитесь окончания текущей игры!');
             } else {
-                window.Telegram.WebApp.showAlert('У вас нет гифтов в инвентаре! Купите в магазине или получите через @rolls_transfer');
+                window.Telegram.WebApp.showAlert('У вас нет гифтов в инвентаре!');
             }
         }
 
+        // Обновление игровой информации
+        function updateGameInfo() {
+            document.getElementById('bankTotal').textContent = `Банк: ${gameData.gameBank.toFixed(2)} TON`;
+            document.getElementById('playersCount').textContent = `Игроков (${gameData.players.length})`;
+
+            // Расчет шанса на победу
+            let userChance = 0;
+            if (gameData.userBet > 0 && gameData.gameBank > 0) {
+                userChance = Math.round((gameData.userBet / gameData.gameBank) * 100);
+            }
+            document.getElementById('participantsInfo').textContent = `Ваш шанс: ${userChance}%`;
+        }
+
+        // Запуск игрового таймера
+        function startGameTimer() {
+            gameData.gameTimer = 30;
+            gameData.gameInProgress = true;
+
+            timers.gameTimer = setInterval(() => {
+                if (gameData.gameTimer > 0) {
+                    document.getElementById('gameTimer').textContent = `Розыгрыш через: ${gameData.gameTimer}с`;
+                    document.getElementById('centerText').innerHTML = `${gameData.gameTimer}с<br>до розыгрыша`;
+                    gameData.gameTimer--;
+                } else {
+                    clearInterval(timers.gameTimer);
+                    startRouletteSpin();
+                }
+            }, 1000);
+        }
+
+        // Запуск рулетки
+        function startRouletteSpin() {
+            const roulette = document.getElementById('roulette');
+
+            // Определяем победителя на основе шансов
+            const winner = determineWinner();
+            const spinDegrees = 1800 + Math.random() * 720; // 5-7 оборотов
+
+            roulette.style.setProperty('--spin-degrees', spinDegrees + 'deg');
+            roulette.classList.add('spinning');
+
+            document.getElementById('centerText').innerHTML = 'Крутится...';
+            document.getElementById('gameTimer').textContent = 'Розыгрыш...';
+
+            setTimeout(() => {
+                roulette.classList.remove('spinning');
+                endGame(winner);
+            }, 4000);
+        }
+
+        // Определение победителя
+        function determineWinner() {
+            const random = Math.random();
+            let cumulative = 0;
+
+            for (let player of gameData.players) {
+                const chance = player.bet / gameData.gameBank;
+                cumulative += chance;
+                if (random <= cumulative) {
+                    return player;
+                }
+            }
+
+            return gameData.players[0]; // Fallback
+        }
+
+        // Завершение игры
+        function endGame(winner) {
+            const houseEdge = 0.05; // 5% комиссия
+            const winAmount = gameData.gameBank * (1 - houseEdge);
+
+            if (winner.id === 'user') {
+                gameData.ton += winAmount;
+                window.Telegram.WebApp.showAlert(`🎉 Вы выиграли ${winAmount.toFixed(2)} TON!`);
+            } else {
+                window.Telegram.WebApp.showAlert(`😔 Выиграл ${winner.name} (${winAmount.toFixed(2)} TON)`);
+            }
+
+            // Сброс игры
+            resetGame();
+            updateBalance();
+            updateGameInfo();
+
+            // Новый номер игры
+            gameData.currentGameId += Math.floor(Math.random() * 10) + 1;
+            document.getElementById('gameId').textContent = `ИГРА #${gameData.currentGameId}`;
+        }
+
+        // Сброс игры
+        function resetGame() {
+            gameData.gameBank = 0;
+            gameData.players = [];
+            gameData.userBet = 0;
+            gameData.gameInProgress = false;
+            gameData.gameTimer = 0;
+
+            document.getElementById('centerText').innerHTML = 'Ожидание<br>игроков';
+            document.getElementById('gameTimer').textContent = 'Ожидание игроков...';
+        }
+
+        // Симуляция активности других игроков
+        function simulateGameActivity() {
+            setInterval(() => {
+                if (!gameData.gameInProgress && Math.random() < 0.3) {
+                    // Добавляем ботов случайно
+                    const botNames = ['Алекс', 'Мария', 'Дмитрий', 'Анна', 'Сергей', 'Катя'];
+                    const botName = botNames[Math.floor(Math.random() * botNames.length)];
+                    const botBet = Math.random() * 5 + 0.5; // От 0.5 до 5.5 TON
+
+                    if (gameData.players.length < 8) {
+                        gameData.players.push({
+                            id: 'bot_' + Date.now(),
+                            name: botName,
+                            bet: botBet
+                        });
+
+                        gameData.gameBank += botBet;
+                        updateGameInfo();
+
+                        if (gameData.players.length === 2 && !gameData.gameInProgress) {
+                            startGameTimer();
+                        }
+                    }
+                }
+            }, Math.random() * 10000 + 5000); // Каждые 5-15 секунд
+        }
+
+        // Остальные функции (инвентарь, навигация и т.д.)
         function addTon() {
             window.Telegram.WebApp.showAlert('Функция добавления TON в разработке!');
         }
 
-        // Функция вращения рулетки
-        function spinRoulette() {
-            const roulette = document.getElementById('roulette');
-            roulette.classList.add('spinning');
-
-            setTimeout(() => {
-                roulette.classList.remove('spinning');
-                // Случайный приз
-                const prizes = ['Гифт!', 'TON!', 'Бонус!'];
-                const prize = prizes[Math.floor(Math.random() * prizes.length)];
-                window.Telegram.WebApp.showAlert(`Поздравляем! Вы выиграли: ${prize}`);
-            }, 4000);
-        }
-
-        // Инвентарь
         function showInventory() {
             document.getElementById('inventoryOverlay').style.display = 'block';
             setActiveNav(2);
@@ -686,7 +900,6 @@
             document.getElementById('inventoryOverlay').style.display = 'none';
         }
 
-        // Навигация
         function setActiveNav(index) {
             const navItems = document.querySelectorAll('.nav-item');
             navItems.forEach((item, i) => {
@@ -703,8 +916,8 @@
         function showShop() { setActiveNav(3); window.Telegram.WebApp.showAlert('Магазин в разработке!'); }
         function showEarnings() { setActiveNav(4); window.Telegram.WebApp.showAlert('Заработок в разработке!'); }
 
-        // Клик по рулетке
-        document.getElementById('roulette').addEventListener('click', spinRoulette);
+        // Клик по рулетке (добавление ставки)
+        document.getElementById('roulette').addEventListener('click', addGifts);
 
         // Попытка загрузить внешний Telegram API
         if (!window.TelegramWebviewProxy) {
