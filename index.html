@@ -624,7 +624,7 @@
 <body>
     <div class="stars"></div>
 
-    <div class="server-status" id="serverStatus">🟢 Сервер подключен</div>
+    <div class="server-status" id="serverStatus">🟢 Единый сервер</div>
 
     <div class="container">
         <div class="header">
@@ -666,7 +666,7 @@
             <div class="players-info">
                 <div class="players-header">
                     <span class="players-count" id="playersCount">Игроков (0)</span>
-                    <span class="game-id" id="gameId">ИГРА #121642</span>
+                    <span class="game-id" id="gameId">ИГРА #121643</span>
                 </div>
                 <div class="players-list" id="playersList"></div>
             </div>
@@ -722,7 +722,7 @@
 
     <div class="winner-modal" id="winnerModal">
         <div class="winner-container fade-in">
-            <div class="winner-title" id="winnerGameId">Игра #121642</div>
+            <div class="winner-title" id="winnerGameId">Игра #121643</div>
             <div class="winner-avatar-large" id="winnerAvatar">
                 <span id="winnerAvatarText">👤</span>
             </div>
@@ -740,13 +740,12 @@
     <script>
         const tg = window.Telegram.WebApp;
 
-        const SERVER_URL = 'https://api.telegram.org/bot7663727657:AAFo7YklijeM-WBmjR4k-MvVgm17zfsMCKw';
-        const GAME_CHANNEL = '@giftroller_game';
+    const FIXED_GAME_ID = 121643;
 
         let gameData = {
             gifts: 7,
             ton: 0,
-            gameId: Math.floor(Date.now() / 1000),
+            gameId: FIXED_GAME_ID,
             players: [],
             gameBank: 0,
             gameStatus: 'waiting',
@@ -773,9 +772,9 @@
             gameData.currentUser = getUserFromTelegram();
 
             createStars();
+            connectToGlobalServer();
+            startGlobalSync();
             updateUI();
-            connectToServer();
-            startServerPolling();
         }
 
         function getUserFromTelegram() {
@@ -796,76 +795,102 @@
             };
         }
 
-        function connectToServer() {
-            localStorage.setItem('giftroller_user', JSON.stringify(gameData.currentUser));
-            localStorage.setItem('giftroller_connected', Date.now().toString());
+        function connectToGlobalServer() {
+            const GLOBAL_GAME_KEY = 'giftroller_global_game';
+            const USER_REGISTRY_KEY = 'giftroller_users_registry';
 
-            document.getElementById('serverStatus').textContent = '🟢 Подключен к серверу';
-
-            loadGameState();
-        }
-
-        function startServerPolling() {
-            clearInterval(updateInterval);
-            updateInterval = setInterval(() => {
-                loadGameState();
-                updateOnlineCount();
-            }, 3000);
-        }
-
-        function loadGameState() {
-            const savedState = localStorage.getItem('giftroller_global_state');
-            if (savedState) {
-                try {
-                    const globalState = JSON.parse(savedState);
-                    if (Date.now() - globalState.timestamp < 10000) {
-                        updateFromGlobalState(globalState);
-                        return;
-                    }
-                } catch (e) {
-                    console.log('Ошибка загрузки состояния:', e);
-                }
+            let globalGame = localStorage.getItem(GLOBAL_GAME_KEY);
+            if (!globalGame) {
+                const initialGame = {
+                    gameId: FIXED_GAME_ID,
+                    players: [],
+                    gameBank: 0,
+                    gameStatus: 'waiting',
+                    gameTimer: 0,
+                    lastUpdate: Date.now()
+                };
+                localStorage.setItem(GLOBAL_GAME_KEY, JSON.stringify(initialGame));
+                globalGame = JSON.stringify(initialGame);
             }
 
-            const fallbackState = {
-                gameId: gameData.gameId,
-                players: gameData.players,
-                gameBank: gameData.gameBank,
-                gameStatus: gameData.gameStatus,
-                gameTimer: gameData.gameTimer,
-                timestamp: Date.now()
-            };
+            let userRegistry = localStorage.getItem(USER_REGISTRY_KEY);
+            if (!userRegistry) {
+                localStorage.setItem(USER_REGISTRY_KEY, JSON.stringify({}));
+            }
 
-            localStorage.setItem('giftroller_global_state', JSON.stringify(fallbackState));
+            registerUserGlobally();
+
+            document.getElementById('serverStatus').textContent = '🟢 Единый сервер';
+
+            loadGlobalGameState();
         }
 
-        function saveGameState() {
-            const globalState = {
-                gameId: gameData.gameId,
+        function registerUserGlobally() {
+            const USER_REGISTRY_KEY = 'giftroller_users_registry';
+            const userRegistry = JSON.parse(localStorage.getItem(USER_REGISTRY_KEY) || '{}');
+
+            userRegistry[gameData.currentUser.id] = {
+                ...gameData.currentUser,
+                lastSeen: Date.now(),
+                gifts: gameData.gifts,
+                ton: gameData.ton
+            };
+
+            localStorage.setItem(USER_REGISTRY_KEY, JSON.stringify(userRegistry));
+            updateOnlineCount();
+        }
+
+        function startGlobalSync() {
+            clearInterval(updateInterval);
+            updateInterval = setInterval(() => {
+                loadGlobalGameState();
+                registerUserGlobally();
+                cleanupOfflineUsers();
+            }, 2000);
+        }
+
+        function loadGlobalGameState() {
+            const GLOBAL_GAME_KEY = 'giftroller_global_game';
+            const globalGameData = localStorage.getItem(GLOBAL_GAME_KEY);
+
+            if (globalGameData) {
+                try {
+                    const globalGame = JSON.parse(globalGameData);
+                    updateFromGlobalGame(globalGame);
+                } catch (e) {
+                    console.log('Ошибка загрузки глобального состояния:', e);
+                }
+            }
+        }
+
+        function saveGlobalGameState() {
+            const GLOBAL_GAME_KEY = 'giftroller_global_game';
+            const globalGame = {
+                gameId: FIXED_GAME_ID,
                 players: gameData.players,
                 gameBank: gameData.gameBank,
                 gameStatus: gameData.gameStatus,
                 gameTimer: gameData.gameTimer,
-                timestamp: Date.now()
+                lastUpdate: Date.now()
             };
 
-            localStorage.setItem('giftroller_global_state', JSON.stringify(globalState));
+            localStorage.setItem(GLOBAL_GAME_KEY, JSON.stringify(globalGame));
 
             window.postMessage({
-                type: 'GIFTROLLER_UPDATE',
-                data: globalState
+                type: 'GIFTROLLER_GLOBAL_UPDATE',
+                data: globalGame
             }, '*');
         }
 
-        function updateFromGlobalState(globalState) {
+        function updateFromGlobalGame(globalGame) {
             const oldPlayersCount = gameData.players.length;
             const oldStatus = gameData.gameStatus;
 
-            gameData.gameId = globalState.gameId;
-            gameData.players = globalState.players || [];
-            gameData.gameBank = globalState.gameBank || 0;
-            gameData.gameStatus = globalState.gameStatus || 'waiting';
-            gameData.gameTimer = globalState.gameTimer || 0;
+            gameData.gameId = FIXED_GAME_ID;
+            gameData.players = globalGame.players || [];
+            gameData.gameBank = globalGame.gameBank || 0;
+            gameData.gameStatus = globalGame.gameStatus || 'waiting';
+            gameData.gameTimer = globalGame.gameTimer || 0;
 
             if (gameData.gameStatus !== oldStatus) {
                 handleStatusChange(oldStatus, gameData.gameStatus);
@@ -879,6 +904,49 @@
             updateUI();
         }
 
+        function updateOnlineCount() {
+            const USER_REGISTRY_KEY = 'giftroller_users_registry';
+            const userRegistry = JSON.parse(localStorage.getItem(USER_REGISTRY_KEY) || '{}');
+            const now = Date.now();
+
+            let onlineCount = 0;
+            for (const userId in userRegistry) {
+                const user = userRegistry[userId];
+                if (user.lastSeen && now - user.lastSeen < 10000) {
+                    onlineCount++;
+                }
+            }
+
+            gameData.onlineUsers = Math.max(onlineCount, 1);
+        }
+
+        function cleanupOfflineUsers() {
+            const USER_REGISTRY_KEY = 'giftroller_users_registry';
+            const userRegistry = JSON.parse(localStorage.getItem(USER_REGISTRY_KEY) || '{}');
+            const now = Date.now();
+
+            for (const userId in userRegistry) {
+                const user = userRegistry[userId];
+                if (user.lastSeen && now - user.lastSeen > 30000) {
+                    delete userRegistry[userId];
+                }
+            }
+
+            localStorage.setItem(USER_REGISTRY_KEY, JSON.stringify(userRegistry));
+        }
+
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'GIFTROLLER_GLOBAL_UPDATE') {
+                updateFromGlobalGame(event.data.data);
+            }
+        });
+
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'giftroller_global_game') {
+                loadGlobalGameState();
+            }
+        });
+
         function handleStatusChange(oldStatus, newStatus) {
             if (newStatus === 'countdown' && oldStatus === 'waiting') {
                 startCountdown();
@@ -890,44 +958,6 @@
                 }, 3000);
             }
         }
-
-        function updateOnlineCount() {
-            const connectedUsers = [];
-            const now = Date.now();
-
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && key.startsWith('giftroller_user_')) {
-                    try {
-                        const userData = JSON.parse(localStorage.getItem(key));
-                        if (userData.lastSeen && now - userData.lastSeen < 30000) {
-                            connectedUsers.push(userData);
-                        }
-                    } catch (e) {
-                        localStorage.removeItem(key);
-                    }
-                }
-            }
-
-            localStorage.setItem(`giftroller_user_${gameData.currentUser.id}`, JSON.stringify({
-                ...gameData.currentUser,
-                lastSeen: now
-            }));
-
-            gameData.onlineUsers = Math.max(connectedUsers.length, 1);
-        }
-
-        window.addEventListener('message', function(event) {
-            if (event.data.type === 'GIFTROLLER_UPDATE') {
-                updateFromGlobalState(event.data.data);
-            }
-        });
-
-        window.addEventListener('storage', function(event) {
-            if (event.key === 'giftroller_global_state') {
-                loadGameState();
-            }
-        });
 
         function joinGame() {
             if (gameData.gifts <= 0) {
@@ -964,12 +994,24 @@
                 startCountdown();
             }
 
-            saveGameState();
+            saveGlobalGameState();
+            updateUserBalance();
             updateUI();
             updatePlayersDisplay();
             updateRoulette();
 
             showAlert('Вы присоединились к игре!');
+        }
+
+        function updateUserBalance() {
+            const USER_REGISTRY_KEY = 'giftroller_users_registry';
+            const userRegistry = JSON.parse(localStorage.getItem(USER_REGISTRY_KEY) || '{}');
+
+            if (userRegistry[gameData.currentUser.id]) {
+                userRegistry[gameData.currentUser.id].gifts = gameData.gifts;
+                userRegistry[gameData.currentUser.id].ton = gameData.ton;
+                localStorage.setItem(USER_REGISTRY_KEY, JSON.stringify(userRegistry));
+            }
         }
 
         function startCountdown() {
@@ -981,7 +1023,7 @@
                     document.getElementById('gameTimer').textContent = `Старт через: ${gameData.gameTimer}с`;
                     document.getElementById('centerText').innerHTML = `Старт<br>через<br>${gameData.gameTimer}с`;
 
-                    saveGameState();
+                    saveGlobalGameState();
                 } else {
                     clearInterval(timerInterval);
                     startGame();
@@ -991,7 +1033,7 @@
 
         function startGame() {
             gameData.gameStatus = 'spinning';
-            saveGameState();
+            saveGlobalGameState();
             startRouletteSpin();
         }
 
@@ -1053,10 +1095,11 @@
             if (winner.id === gameData.currentUser.id) {
                 gameData.ton += gameData.gameBank;
                 gameData.gifts += 2;
+                updateUserBalance();
             }
 
             showWinnerModal(winner);
-            saveGameState();
+            saveGlobalGameState();
 
             setTimeout(() => {
                 resetGame();
@@ -1064,7 +1107,6 @@
         }
 
         function resetGame() {
-            gameData.gameId = Math.floor(Date.now() / 1000);
             gameData.players = [];
             gameData.gameBank = 0;
             gameData.gameStatus = 'waiting';
@@ -1073,7 +1115,7 @@
             document.getElementById('centerText').innerHTML = 'Ожидание<br>игроков';
             document.getElementById('gameTimer').textContent = 'Ожидание игроков...';
 
-            saveGameState();
+            saveGlobalGameState();
             updateUI();
             updatePlayersDisplay();
             updateRoulette();
@@ -1099,7 +1141,7 @@
             document.getElementById('tonBalance').textContent = `${gameData.ton.toFixed(2)} TON`;
             document.getElementById('bankTotal').textContent = `Банк: ${gameData.gameBank.toFixed(2)} TON`;
             document.getElementById('playersCount').textContent = `Игроков (${gameData.players.length})`;
-            document.getElementById('gameId').textContent = `ИГРА #${gameData.gameId}`;
+            document.getElementById('gameId').textContent = `ИГРА #${FIXED_GAME_ID}`;
             document.getElementById('onlineCounter').textContent = `● ${gameData.onlineUsers} онлайн`;
 
             const userInGame = gameData.players.some(p => p.id === gameData.currentUser.id);
@@ -1150,7 +1192,7 @@
 
                 let avatarContent;
                 if (player.photo_url) {
-                    avatarContent = `<img src="${player.photo_url}" alt="${player.first_name}">`;
+                    avatarContent = `<img src="${player.photo_url}" alt="${player.first_name}" onerror="this.outerHTML='${player.first_name.charAt(0).toUpperCase()}'">`;
                 } else {
                     avatarContent = player.first_name.charAt(0).toUpperCase();
                 }
@@ -1206,7 +1248,7 @@
                 avatar.style.backgroundColor = playerColor;
 
                 if (player.photo_url) {
-                    avatar.innerHTML = `<img src="${player.photo_url}" alt="${player.first_name}">`;
+                    avatar.innerHTML = `<img src="${player.photo_url}" alt="${player.first_name}" onerror="this.innerHTML='${player.first_name.charAt(0).toUpperCase()}'">`;
                 } else {
                     avatar.textContent = player.first_name.charAt(0).toUpperCase();
                 }
@@ -1224,7 +1266,7 @@
         }
 
         function showWinnerModal(winner) {
-            document.getElementById('winnerGameId').textContent = `Игра #${gameData.gameId}`;
+            document.getElementById('winnerGameId').textContent = `Игра #${FIXED_GAME_ID}`;
 
             const winnerIndex = gameData.players.findIndex(p => p.id === winner.id);
             const winnerColor = winnerIndex >= 0 ? gameData.colors[winnerIndex % gameData.colors.length] : '#4a9eff';
