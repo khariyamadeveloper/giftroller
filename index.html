@@ -375,7 +375,6 @@
             font-weight: 500;
         }
 
-        /* Инвентарь */
         .inventory-overlay {
             position: fixed;
             top: 0;
@@ -484,7 +483,6 @@
             color: #0d1421;
         }
 
-        /* Модальное окно победителя */
         .winner-modal {
             position: fixed;
             top: 0;
@@ -585,7 +583,6 @@
             background: #45a049;
         }
 
-        /* Анимации */
         .spinning {
             animation: spin 4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
@@ -604,17 +601,36 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        /* Цвета игроков */
         .player-color-1 { background-color: #ff4500; }
         .player-color-2 { background-color: #9c27b0; }
         .player-color-3 { background-color: #2196f3; }
         .player-color-4 { background-color: #4caf50; }
         .player-color-5 { background-color: #ff9800; }
         .player-color-6 { background-color: #e91e63; }
+
+        .debug-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 9999;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="stars"></div>
+
+    <div class="debug-panel" id="debugPanel">
+        <div>User ID: <span id="debugUserId">-</span></div>
+        <div>Username: <span id="debugUsername">-</span></div>
+        <div>Photo URL: <span id="debugPhotoUrl">-</span></div>
+        <div>Connected: <span id="debugConnected">false</span></div>
+    </div>
 
     <div class="container">
         <div class="header">
@@ -622,7 +638,7 @@
                 <div style="font-size: 24px;">⏰</div>
                 <span class="online-counter" id="onlineCounter">● 1 онлайн</span>
             </div>
-            <div style="font-size: 24px;">🔍</div>
+            <div style="font-size: 24px;" onclick="toggleDebug()">🔍</div>
         </div>
 
         <div class="balance-container">
@@ -659,7 +675,6 @@
                     <span class="game-id" id="gameId">ИГРА #121642</span>
                 </div>
                 <div class="players-list" id="playersList">
-                    <!-- Список игроков будет добавляться динамически -->
                 </div>
             </div>
 
@@ -688,7 +703,6 @@
         </div>
     </div>
 
-    <!-- Инвентарь -->
     <div class="inventory-overlay" id="inventoryOverlay">
         <div class="inventory-container">
             <div class="inventory-header">
@@ -713,7 +727,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно победителя -->
     <div class="winner-modal" id="winnerModal">
         <div class="winner-container fade-in">
             <div class="winner-title" id="winnerGameId">Игра #121642</div>
@@ -731,28 +744,8 @@
     </div>
 
     <script>
-        // Telegram WebApp API
-        window.Telegram = window.Telegram || {};
-        window.Telegram.WebApp = {
-            initData: '',
-            initDataUnsafe: {},
-            ready: function() { 
-                console.log('WebApp ready');
-                // Получаем данные пользователя из Telegram
-                if (this.initDataUnsafe && this.initDataUnsafe.user) {
-                    gameData.currentUser = this.initDataUnsafe.user;
-                    updateUserInfo();
-                }
-            },
-            expand: function() { console.log('WebApp expand'); },
-            showAlert: function(message) { alert(message); },
-            sendData: function(data) {
-                console.log('Sending data to bot:', data);
-                // Здесь отправляем данные боту
-            }
-        };
+        let tg = window.Telegram?.WebApp;
 
-        // Игровые данные
         let gameData = {
             gifts: 7,
             ton: 0,
@@ -765,39 +758,82 @@
             userInGame: false,
             colors: ['#ff4500', '#9c27b0', '#2196f3', '#4caf50', '#ff9800', '#e91e63'],
             currentUser: {
-                id: 1,
+                id: null,
                 first_name: 'User',
-                username: 'username',
+                username: 'user',
                 photo_url: null
             }
         };
 
-        let timers = {
-            gameTimer: null
-        };
-
-        // Инициализация
         document.addEventListener('DOMContentLoaded', function() {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.expand();
-
+            initializeTelegramWebApp();
             createStars();
             updateBalance();
             updateGameInfo();
 
-            // Попытка получить данные пользователя из Telegram
-            if (window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
-                gameData.currentUser = window.Telegram.WebApp.initDataUnsafe.user;
-                updateUserInfo();
-            }
+            setInterval(syncWithServer, 5000);
+
+            setTimeout(getUserDataFromBot, 1000);
         });
 
-        // Обновление информации пользователя
-        function updateUserInfo() {
-            console.log('Current user:', gameData.currentUser);
+        function initializeTelegramWebApp() {
+            if (tg) {
+                tg.ready();
+                tg.expand();
+                tg.setHeaderColor('#0d1421');
+                tg.setBackgroundColor('#0d1421');
+
+                if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                    gameData.currentUser = {
+                        id: tg.initDataUnsafe.user.id,
+                        first_name: tg.initDataUnsafe.user.first_name || 'User',
+                        username: tg.initDataUnsafe.user.username || `user${tg.initDataUnsafe.user.id}`,
+                        photo_url: tg.initDataUnsafe.user.photo_url || null
+                    };
+
+                    updateDebugInfo();
+                    getUserDataFromBot();
+                } else {
+                    gameData.currentUser = {
+                        id: Math.floor(Math.random() * 1000000),
+                        first_name: `Тестер${Math.floor(Math.random() * 100)}`,
+                        username: `test_user_${Math.floor(Math.random() * 100)}`,
+                        photo_url: null
+                    };
+                    updateDebugInfo();
+                }
+            }
         }
 
-        // Создание звезд
+        function updateDebugInfo() {
+            document.getElementById('debugUserId').textContent = gameData.currentUser.id || 'null';
+            document.getElementById('debugUsername').textContent = gameData.currentUser.username || 'null';
+            document.getElementById('debugPhotoUrl').textContent = gameData.currentUser.photo_url ? 'Есть' : 'Нет';
+            document.getElementById('debugConnected').textContent = tg ? 'true' : 'false';
+        }
+
+        function toggleDebug() {
+            const panel = document.getElementById('debugPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function getUserDataFromBot() {
+            if (tg && tg.sendData) {
+                tg.sendData(JSON.stringify({
+                    action: 'get_user_data',
+                    user_id: gameData.currentUser.id
+                }));
+            }
+        }
+
+        function syncWithServer() {
+            if (tg && tg.sendData) {
+                tg.sendData(JSON.stringify({
+                    action: 'sync_game_state'
+                }));
+            }
+        }
+
         function createStars() {
             const starsContainer = document.querySelector('.stars');
             for (let i = 0; i < 60; i++) {
@@ -812,7 +848,6 @@
             }
         }
 
-        // Обновление баланса
         function updateBalance() {
             document.getElementById('giftsBalance').textContent = `${gameData.gifts} ГИФТОВ`;
             document.getElementById('tonBalance').textContent = `${gameData.ton.toFixed(2)} TON`;
@@ -830,17 +865,15 @@
             }
         }
 
-        // Добавление реального игрока
-        function addRealPlayer(userData, gifts) {
+        function addRealPlayer(userData) {
             if (gameData.players.find(p => p.id === userData.id)) return;
 
             const player = {
                 id: userData.id,
-                username: userData.username || userData.first_name,
+                username: userData.username,
                 first_name: userData.first_name,
                 photo_url: userData.photo_url,
-                gifts: gifts,
-                bet: gifts * 1.0,
+                bet: 1.0,
                 color: gameData.colors[gameData.players.length % gameData.colors.length]
             };
 
@@ -851,13 +884,11 @@
             updatePlayersList();
             updateRoulette();
 
-            // Запускаем таймер только при 2+ игроков
             if (gameData.players.length >= 2 && !gameData.gameInProgress) {
                 startGameTimer();
             }
         }
 
-        // Обновление информации об игре
         function updateGameInfo() {
             document.getElementById('bankTotal').textContent = `Банк: ${gameData.gameBank.toFixed(2)} TON`;
             document.getElementById('playersCount').textContent = `Игроков (${gameData.players.length})`;
@@ -877,7 +908,6 @@
             }
         }
 
-        // Обновление списка игроков
         function updatePlayersList() {
             const playersList = document.getElementById('playersList');
             playersList.innerHTML = '';
@@ -888,13 +918,16 @@
                 const playerItem = document.createElement('div');
                 playerItem.className = 'player-item';
 
-                const avatarHtml = player.photo_url ? 
-                    `<img src="${player.photo_url}" alt="${player.first_name}">` :
-                    player.first_name.charAt(0).toUpperCase();
+                let avatarContent;
+                if (player.photo_url) {
+                    avatarContent = `<img src="${player.photo_url}" alt="${player.first_name}" onerror="this.outerHTML='${player.first_name.charAt(0).toUpperCase()}'">`;
+                } else {
+                    avatarContent = player.first_name.charAt(0).toUpperCase();
+                }
 
                 playerItem.innerHTML = `
                     <div class="player-avatar-small" style="background-color: ${player.color}">
-                        ${avatarHtml}
+                        ${avatarContent}
                     </div>
                     <div class="player-info">
                         <div class="player-name">@${player.username}</div>
@@ -906,7 +939,6 @@
             });
         }
 
-        // Обновление рулетки с цветами игроков
         function updateRoulette() {
             const roulette = document.getElementById('roulette');
 
@@ -915,7 +947,6 @@
                 return;
             }
 
-            // Создаем градиент на основе шансов игроков
             let gradientStops = [];
             let currentAngle = 0;
 
@@ -929,10 +960,8 @@
 
             roulette.style.background = `conic-gradient(${gradientStops.join(', ')})`;
 
-            // Убираем старые аватарки
             document.querySelectorAll('.player-avatar').forEach(el => el.remove());
 
-            // Добавляем аватарки игроков на рулетку
             currentAngle = 0;
             gameData.players.forEach((player, index) => {
                 const chance = player.bet / gameData.gameBank;
@@ -944,12 +973,11 @@
                 avatar.style.backgroundColor = player.color;
 
                 if (player.photo_url) {
-                    avatar.innerHTML = `<img src="${player.photo_url}" alt="${player.first_name}">`;
+                    avatar.innerHTML = `<img src="${player.photo_url}" alt="${player.first_name}" onerror="this.innerHTML='${player.first_name.charAt(0).toUpperCase()}'">`;
                 } else {
                     avatar.textContent = player.first_name.charAt(0).toUpperCase();
                 }
 
-                // Позиционируем аватарку на рулетке
                 const radius = 110;
                 const x = Math.cos((avatarAngle - 90) * Math.PI / 180) * radius;
                 const y = Math.sin((avatarAngle - 90) * Math.PI / 180) * radius;
@@ -962,24 +990,22 @@
             });
         }
 
-        // Запуск таймера игры
         function startGameTimer() {
             gameData.gameInProgress = true;
             gameData.gameTimer = 30;
 
-            timers.gameTimer = setInterval(() => {
+            const timerInterval = setInterval(() => {
                 if (gameData.gameTimer > 0) {
                     document.getElementById('gameTimer').textContent = `Старт через: ${gameData.gameTimer}с`;
                     document.getElementById('centerText').innerHTML = `Старт<br>через<br>${gameData.gameTimer}с`;
                     gameData.gameTimer--;
                 } else {
-                    clearInterval(timers.gameTimer);
+                    clearInterval(timerInterval);
                     startRouletteSpin();
                 }
             }, 1000);
         }
 
-        // Запуск вращения рулетки
         function startRouletteSpin() {
             const roulette = document.getElementById('roulette');
 
@@ -1014,7 +1040,6 @@
             }, 4000);
         }
 
-        // Определение победителя
         function determineWinner() {
             const random = Math.random();
             let cumulative = 0;
@@ -1030,17 +1055,17 @@
             return gameData.players[0];
         }
 
-        // Завершение игры
         function endGame(winner) {
             const prize = gameData.gameBank;
 
             showWinnerModal(winner, prize);
 
-            // Если это текущий пользователь, обновляем баланс
             if (winner.id === gameData.currentUser.id) {
                 gameData.ton += prize;
-                gameData.gifts += winner.gifts; // Возвращаем удвоенные гифты
-                window.Telegram.WebApp.showAlert(`🎉 Вы выиграли ${prize.toFixed(2)} TON!`);
+                gameData.gifts += 2;
+                if (tg) {
+                    tg.showAlert(`🎉 Вы выиграли ${prize.toFixed(2)} TON!`);
+                }
             }
 
             setTimeout(() => {
@@ -1048,7 +1073,6 @@
             }, 5000);
         }
 
-        // Показ модального окна победителя
         function showWinnerModal(winner, prize) {
             document.getElementById('winnerGameId').textContent = `Игра #${gameData.gameId}`;
 
@@ -1067,12 +1091,10 @@
             document.getElementById('winnerModal').style.display = 'flex';
         }
 
-        // Закрытие модального окна
         function closeWinnerModal() {
             document.getElementById('winnerModal').style.display = 'none';
         }
 
-        // Сброс игры
         function resetGame() {
             gameData.gameBank = 0;
             gameData.players = [];
@@ -1094,37 +1116,55 @@
             closeWinnerModal();
         }
 
-        // Добавление гифтов пользователем
         function addGifts() {
             if (gameData.gifts > 0 && !gameData.userInGame && !gameData.gameInProgress) {
                 gameData.userInGame = true;
                 gameData.gifts -= 1;
 
-                // Добавляем реального пользователя
-                addRealPlayer(gameData.currentUser, 1);
+                addRealPlayer(gameData.currentUser);
 
                 updateBalance();
 
-                // Отправляем данные боту
-                if (window.Telegram.WebApp.sendData) {
-                    window.Telegram.WebApp.sendData(JSON.stringify({
+                if (tg && tg.sendData) {
+                    tg.sendData(JSON.stringify({
                         action: 'join_game',
                         user_id: gameData.currentUser.id,
+                        username: gameData.currentUser.username,
+                        first_name: gameData.currentUser.first_name,
+                        photo_url: gameData.currentUser.photo_url,
                         gifts: 1
                     }));
                 }
 
-                window.Telegram.WebApp.showAlert('Вы присоединились к игре!');
+                if (tg) {
+                    tg.showAlert('Вы присоединились к игре!');
+                } else {
+                    alert('Вы присоединились к игре!');
+                }
             } else if (gameData.gameInProgress) {
-                window.Telegram.WebApp.showAlert('Игра уже идет! Дождитесь следующей.');
+                const msg = 'Игра уже идет! Дождитесь следующей.';
+                if (tg) {
+                    tg.showAlert(msg);
+                } else {
+                    alert(msg);
+                }
             } else if (gameData.userInGame) {
-                window.Telegram.WebApp.showAlert('Вы уже участвуете в этой игре!');
+                const msg = 'Вы уже участвуете в этой игре!';
+                if (tg) {
+                    tg.showAlert(msg);
+                } else {
+                    alert(msg);
+                }
             } else {
-                window.Telegram.WebApp.showAlert('У вас нет гифтов!');
+                const msg = 'У вас нет гифтов!';
+                if (tg) {
+                    tg.showAlert(msg);
+                } else {
+                    alert(msg);
+                }
             }
         }
 
-        // Инвентарь
         function showInventory() {
             document.getElementById('inventoryOverlay').style.display = 'block';
             setActiveNav(2);
@@ -1132,10 +1172,9 @@
 
         function closeInventory() {
             document.getElementById('inventoryOverlay').style.display = 'none';
-            setActiveNav(0); // Возвращаемся к ПвП
+            setActiveNav(0);
         }
 
-        // Навигация
         function setActiveNav(index) {
             const navItems = document.querySelectorAll('.nav-item');
             navItems.forEach((item, i) => {
@@ -1147,18 +1186,14 @@
             });
         }
 
-        // Клик по рулетке
         document.getElementById('roulette').addEventListener('click', addGifts);
 
-        // Попытка загрузить внешний Telegram API
-        if (!window.TelegramWebviewProxy) {
+        if (!window.Telegram) {
             const script = document.createElement('script');
             script.src = 'https://telegram.org/js/telegram-web-app.js';
             script.onload = function() {
-                if (window.Telegram && window.Telegram.WebApp) {
-                    window.Telegram.WebApp.ready();
-                    window.Telegram.WebApp.expand();
-                }
+                tg = window.Telegram?.WebApp;
+                initializeTelegramWebApp();
             };
             document.head.appendChild(script);
         }
