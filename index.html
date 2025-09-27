@@ -287,6 +287,22 @@
             color: rgba(255, 255, 255, 0.6);
         }
 
+        .sync-status {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            z-index: 9999;
+        }
+
+        .sync-active {
+            background: rgba(76, 175, 80, 0.8);
+        }
+
         .players-list {
             display: flex;
             flex-direction: column;
@@ -607,30 +623,12 @@
         .player-color-4 { background-color: #4caf50; }
         .player-color-5 { background-color: #ff9800; }
         .player-color-6 { background-color: #e91e63; }
-
-        .debug-panel {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            z-index: 9999;
-            display: none;
-        }
     </style>
 </head>
 <body>
     <div class="stars"></div>
 
-    <div class="debug-panel" id="debugPanel">
-        <div>User ID: <span id="debugUserId">-</span></div>
-        <div>Username: <span id="debugUsername">-</span></div>
-        <div>Photo URL: <span id="debugPhotoUrl">-</span></div>
-        <div>Connected: <span id="debugConnected">false</span></div>
-    </div>
+    <div class="sync-status" id="syncStatus">🔄 Синхронизация...</div>
 
     <div class="container">
         <div class="header">
@@ -638,7 +636,7 @@
                 <div style="font-size: 24px;">⏰</div>
                 <span class="online-counter" id="onlineCounter">● 1 онлайн</span>
             </div>
-            <div style="font-size: 24px;" onclick="toggleDebug()">🔍</div>
+            <div style="font-size: 24px;">🔍</div>
         </div>
 
         <div class="balance-container">
@@ -762,8 +760,13 @@
                 first_name: 'User',
                 username: 'user',
                 photo_url: null
-            }
+            },
+            lastSync: Date.now(),
+            syncId: Math.random().toString(36).substr(2, 9)
         };
+
+        let syncInterval;
+        let isPageVisible = true;
 
         document.addEventListener('DOMContentLoaded', function() {
             initializeTelegramWebApp();
@@ -771,9 +774,10 @@
             updateBalance();
             updateGameInfo();
 
-            setInterval(syncWithServer, 5000);
+            startContinuousSync();
+            initializeVisibilityAPI();
 
-            setTimeout(getUserDataFromBot, 1000);
+            setTimeout(requestGameState, 1000);
         });
 
         function initializeTelegramWebApp() {
@@ -790,48 +794,75 @@
                         username: tg.initDataUnsafe.user.username || `user${tg.initDataUnsafe.user.id}`,
                         photo_url: tg.initDataUnsafe.user.photo_url || null
                     };
-
-                    updateDebugInfo();
-                    getUserDataFromBot();
                 } else {
                     gameData.currentUser = {
                         id: Math.floor(Math.random() * 1000000),
-                        first_name: `Тестер${Math.floor(Math.random() * 100)}`,
-                        username: `test_user_${Math.floor(Math.random() * 100)}`,
+                        first_name: `User${Math.floor(Math.random() * 100)}`,
+                        username: `user_${Math.floor(Math.random() * 100)}`,
                         photo_url: null
                     };
-                    updateDebugInfo();
                 }
+
+                registerWithServer();
             }
         }
 
-        function updateDebugInfo() {
-            document.getElementById('debugUserId').textContent = gameData.currentUser.id || 'null';
-            document.getElementById('debugUsername').textContent = gameData.currentUser.username || 'null';
-            document.getElementById('debugPhotoUrl').textContent = gameData.currentUser.photo_url ? 'Есть' : 'Нет';
-            document.getElementById('debugConnected').textContent = tg ? 'true' : 'false';
+        function startContinuousSync() {
+            clearInterval(syncInterval);
+            syncInterval = setInterval(() => {
+                if (isPageVisible) {
+                    requestGameState();
+                }
+            }, 2000);
+
+            updateSyncStatus('🟢 Активно');
         }
 
-        function toggleDebug() {
-            const panel = document.getElementById('debugPanel');
-            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        function initializeVisibilityAPI() {
+            document.addEventListener('visibilitychange', function() {
+                isPageVisible = !document.hidden;
+                if (isPageVisible) {
+                    startContinuousSync();
+                    requestGameState();
+                } else {
+                    clearInterval(syncInterval);
+                    updateSyncStatus('⏸️ Пауза');
+                }
+            });
         }
 
-        function getUserDataFromBot() {
+        function registerWithServer() {
             if (tg && tg.sendData) {
                 tg.sendData(JSON.stringify({
-                    action: 'get_user_data',
-                    user_id: gameData.currentUser.id
+                    action: 'register_user',
+                    user_id: gameData.currentUser.id,
+                    username: gameData.currentUser.username,
+                    first_name: gameData.currentUser.first_name,
+                    photo_url: gameData.currentUser.photo_url,
+                    sync_id: gameData.syncId
                 }));
             }
         }
 
-        function syncWithServer() {
+        function requestGameState() {
             if (tg && tg.sendData) {
                 tg.sendData(JSON.stringify({
-                    action: 'sync_game_state'
+                    action: 'get_game_state',
+                    user_id: gameData.currentUser.id,
+                    sync_id: gameData.syncId,
+                    last_sync: gameData.lastSync
                 }));
+
+                updateSyncStatus('🔄 Синхронизация...');
+
+                gameData.lastSync = Date.now();
             }
+        }
+
+        function updateSyncStatus(status) {
+            const syncStatus = document.getElementById('syncStatus');
+            syncStatus.textContent = status;
+            syncStatus.className = status.includes('Активно') ? 'sync-status sync-active' : 'sync-status';
         }
 
         function createStars() {
@@ -848,44 +879,82 @@
             }
         }
 
+        window.handleServerUpdate = function(serverData) {
+            if (!serverData) return;
+
+            if (serverData.game_state) {
+                updateFromServerState(serverData.game_state);
+            }
+
+            if (serverData.user_data) {
+                updateUserData(serverData.user_data);
+            }
+
+            updateSyncStatus('🟢 Активно');
+        };
+
+        function updateFromServerState(serverState) {
+            const oldPlayersCount = gameData.players.length;
+
+            gameData.gameId = serverState.game_id || gameData.gameId;
+            gameData.gameBank = serverState.bank || 0;
+            gameData.players = serverState.players || [];
+            gameData.gameTimer = serverState.timer || 30;
+            gameData.onlineUsers = serverState.online_count || 1;
+
+            const newGameStatus = serverState.status || 'waiting';
+
+            if (newGameStatus !== gameData.gameInProgress) {
+                if (newGameStatus === 'countdown' && !gameData.gameInProgress) {
+                    startClientTimer(gameData.gameTimer);
+                } else if (newGameStatus === 'spinning') {
+                    startRouletteSpinFromServer(serverState.winner);
+                } else if (newGameStatus === 'finished' && serverState.winner) {
+                    showWinnerFromServer(serverState.winner, serverState.bank);
+                }
+
+                gameData.gameInProgress = newGameStatus !== 'waiting';
+            }
+
+            updateAllUI();
+
+            if (gameData.players.length !== oldPlayersCount) {
+                updateRoulette();
+            }
+        }
+
+        function updateUserData(userData) {
+            gameData.gifts = userData.gifts || gameData.gifts;
+            gameData.ton = userData.ton || gameData.ton;
+            updateBalance();
+        }
+
+        function updateAllUI() {
+            updateGameInfo();
+            updatePlayersList();
+            updateOnlineCounter();
+            updateGameId();
+        }
+
         function updateBalance() {
             document.getElementById('giftsBalance').textContent = `${gameData.gifts} ГИФТОВ`;
             document.getElementById('tonBalance').textContent = `${gameData.ton.toFixed(2)} TON`;
 
             const addGiftsBtn = document.getElementById('addGiftsBtn');
+            const userInCurrentGame = gameData.players.some(p => p.user_id === gameData.currentUser.id);
+
             if (gameData.gifts === 0) {
                 addGiftsBtn.disabled = true;
                 addGiftsBtn.textContent = 'Нет гифтов';
-            } else if (gameData.userInGame) {
+            } else if (userInCurrentGame) {
                 addGiftsBtn.disabled = true;
                 addGiftsBtn.textContent = 'Уже в игре';
+            } else if (gameData.gameInProgress) {
+                addGiftsBtn.disabled = true;
+                addGiftsBtn.textContent = 'Игра идет';
             } else {
                 addGiftsBtn.disabled = false;
                 addGiftsBtn.textContent = '+ Добавить Гифты';
-            }
-        }
-
-        function addRealPlayer(userData) {
-            if (gameData.players.find(p => p.id === userData.id)) return;
-
-            const player = {
-                id: userData.id,
-                username: userData.username,
-                first_name: userData.first_name,
-                photo_url: userData.photo_url,
-                bet: 1.0,
-                color: gameData.colors[gameData.players.length % gameData.colors.length]
-            };
-
-            gameData.players.push(player);
-            gameData.gameBank += player.bet;
-
-            updateGameInfo();
-            updatePlayersList();
-            updateRoulette();
-
-            if (gameData.players.length >= 2 && !gameData.gameInProgress) {
-                startGameTimer();
             }
         }
 
@@ -898,8 +967,8 @@
             } else if (gameData.players.length === 1) {
                 document.getElementById('participantsInfo').textContent = 'Ждем еще одного игрока...';
             } else {
-                const userPlayer = gameData.players.find(p => p.id === gameData.currentUser.id);
-                if (userPlayer) {
+                const userPlayer = gameData.players.find(p => p.user_id === gameData.currentUser.id);
+                if (userPlayer && gameData.gameBank > 0) {
                     const chance = Math.round((userPlayer.bet / gameData.gameBank) * 100);
                     document.getElementById('participantsInfo').textContent = `Ваш шанс: ${chance}%`;
                 } else {
@@ -913,7 +982,7 @@
             playersList.innerHTML = '';
 
             gameData.players.forEach((player, index) => {
-                const chance = Math.round((player.bet / gameData.gameBank) * 100);
+                const chance = gameData.gameBank > 0 ? Math.round((player.bet / gameData.gameBank) * 100) : 0;
 
                 const playerItem = document.createElement('div');
                 playerItem.className = 'player-item';
@@ -925,8 +994,10 @@
                     avatarContent = player.first_name.charAt(0).toUpperCase();
                 }
 
+                const playerColor = gameData.colors[index % gameData.colors.length];
+
                 playerItem.innerHTML = `
-                    <div class="player-avatar-small" style="background-color: ${player.color}">
+                    <div class="player-avatar-small" style="background-color: ${playerColor}">
                         ${avatarContent}
                     </div>
                     <div class="player-info">
@@ -944,6 +1015,7 @@
 
             if (gameData.players.length === 0) {
                 roulette.style.background = '#ff4500';
+                document.querySelectorAll('.player-avatar').forEach(el => el.remove());
                 return;
             }
 
@@ -953,8 +1025,9 @@
             gameData.players.forEach((player, index) => {
                 const chance = player.bet / gameData.gameBank;
                 const angleSpan = chance * 360;
+                const playerColor = gameData.colors[index % gameData.colors.length];
 
-                gradientStops.push(`${player.color} ${currentAngle}deg ${currentAngle + angleSpan}deg`);
+                gradientStops.push(`${playerColor} ${currentAngle}deg ${currentAngle + angleSpan}deg`);
                 currentAngle += angleSpan;
             });
 
@@ -967,10 +1040,11 @@
                 const chance = player.bet / gameData.gameBank;
                 const angleSpan = chance * 360;
                 const avatarAngle = currentAngle + angleSpan / 2;
+                const playerColor = gameData.colors[index % gameData.colors.length];
 
                 const avatar = document.createElement('div');
                 avatar.className = 'player-avatar';
-                avatar.style.backgroundColor = player.color;
+                avatar.style.backgroundColor = playerColor;
 
                 if (player.photo_url) {
                     avatar.innerHTML = `<img src="${player.photo_url}" alt="${player.first_name}" onerror="this.innerHTML='${player.first_name.charAt(0).toUpperCase()}'">`;
@@ -990,26 +1064,33 @@
             });
         }
 
-        function startGameTimer() {
+        function updateOnlineCounter() {
+            document.getElementById('onlineCounter').textContent = `● ${gameData.onlineUsers} онлайн`;
+        }
+
+        function updateGameId() {
+            document.getElementById('gameId').textContent = `ИГРА #${gameData.gameId}`;
+        }
+
+        function startClientTimer(seconds) {
             gameData.gameInProgress = true;
-            gameData.gameTimer = 30;
+            let remainingTime = seconds;
 
             const timerInterval = setInterval(() => {
-                if (gameData.gameTimer > 0) {
-                    document.getElementById('gameTimer').textContent = `Старт через: ${gameData.gameTimer}с`;
-                    document.getElementById('centerText').innerHTML = `Старт<br>через<br>${gameData.gameTimer}с`;
-                    gameData.gameTimer--;
+                if (remainingTime > 0) {
+                    document.getElementById('gameTimer').textContent = `Старт через: ${remainingTime}с`;
+                    document.getElementById('centerText').innerHTML = `Старт<br>через<br>${remainingTime}с`;
+                    remainingTime--;
                 } else {
                     clearInterval(timerInterval);
-                    startRouletteSpin();
+                    document.getElementById('centerText').innerHTML = 'Крутится...';
+                    document.getElementById('gameTimer').textContent = 'Определение победителя...';
                 }
             }, 1000);
         }
 
-        function startRouletteSpin() {
+        function startRouletteSpinFromServer(winner) {
             const roulette = document.getElementById('roulette');
-
-            const winner = determineWinner();
 
             let targetAngle = 0;
             let currentAngle = 0;
@@ -1019,7 +1100,7 @@
                 const chance = player.bet / gameData.gameBank;
                 const angleSpan = chance * 360;
 
-                if (player.id === winner.id) {
+                if (player.user_id === winner.user_id) {
                     targetAngle = currentAngle + angleSpan / 2;
                     break;
                 }
@@ -1031,53 +1112,18 @@
             roulette.style.setProperty('--spin-degrees', spinDegrees + 'deg');
             roulette.classList.add('spinning');
 
-            document.getElementById('centerText').innerHTML = 'Крутится...';
-            document.getElementById('gameTimer').textContent = 'Определение победителя...';
-
             setTimeout(() => {
                 roulette.classList.remove('spinning');
-                endGame(winner);
             }, 4000);
         }
 
-        function determineWinner() {
-            const random = Math.random();
-            let cumulative = 0;
-
-            for (let player of gameData.players) {
-                const chance = player.bet / gameData.gameBank;
-                cumulative += chance;
-                if (random <= cumulative) {
-                    return player;
-                }
-            }
-
-            return gameData.players[0];
-        }
-
-        function endGame(winner) {
-            const prize = gameData.gameBank;
-
-            showWinnerModal(winner, prize);
-
-            if (winner.id === gameData.currentUser.id) {
-                gameData.ton += prize;
-                gameData.gifts += 2;
-                if (tg) {
-                    tg.showAlert(`🎉 Вы выиграли ${prize.toFixed(2)} TON!`);
-                }
-            }
-
-            setTimeout(() => {
-                resetGame();
-            }, 5000);
-        }
-
-        function showWinnerModal(winner, prize) {
+        function showWinnerFromServer(winner, prize) {
             document.getElementById('winnerGameId').textContent = `Игра #${gameData.gameId}`;
 
             const winnerAvatar = document.getElementById('winnerAvatar');
-            winnerAvatar.style.backgroundColor = winner.color;
+            const winnerIndex = gameData.players.findIndex(p => p.user_id === winner.user_id);
+            const winnerColor = winnerIndex >= 0 ? gameData.colors[winnerIndex % gameData.colors.length] : '#4a9eff';
+            winnerAvatar.style.backgroundColor = winnerColor;
 
             if (winner.photo_url) {
                 winnerAvatar.innerHTML = `<img src="${winner.photo_url}" alt="${winner.first_name}">`;
@@ -1089,78 +1135,50 @@
             document.getElementById('winnerPrize').textContent = `Выиграл ${prize.toFixed(2)} TON`;
 
             document.getElementById('winnerModal').style.display = 'flex';
-        }
 
-        function closeWinnerModal() {
-            document.getElementById('winnerModal').style.display = 'none';
-        }
-
-        function resetGame() {
-            gameData.gameBank = 0;
-            gameData.players = [];
-            gameData.gameInProgress = false;
-            gameData.userInGame = false;
-            gameData.gameTimer = 30;
-
-            gameData.gameId += Math.floor(Math.random() * 10) + 1;
-            document.getElementById('gameId').textContent = `ИГРА #${gameData.gameId}`;
-
-            document.getElementById('centerText').innerHTML = 'Ожидание<br>игроков';
-            document.getElementById('gameTimer').textContent = 'Ожидание игроков...';
-
-            updateBalance();
-            updateGameInfo();
-            updatePlayersList();
-            updateRoulette();
-
-            closeWinnerModal();
+            setTimeout(() => {
+                document.getElementById('winnerModal').style.display = 'none';
+                gameData.gameInProgress = false;
+                updateBalance();
+            }, 5000);
         }
 
         function addGifts() {
-            if (gameData.gifts > 0 && !gameData.userInGame && !gameData.gameInProgress) {
-                gameData.userInGame = true;
-                gameData.gifts -= 1;
+            if (gameData.gifts > 0 && !gameData.gameInProgress) {
+                const userInGame = gameData.players.some(p => p.user_id === gameData.currentUser.id);
 
-                addRealPlayer(gameData.currentUser);
+                if (!userInGame) {
+                    if (tg && tg.sendData) {
+                        tg.sendData(JSON.stringify({
+                            action: 'join_game',
+                            user_id: gameData.currentUser.id,
+                            username: gameData.currentUser.username,
+                            first_name: gameData.currentUser.first_name,
+                            photo_url: gameData.currentUser.photo_url,
+                            gifts: 1,
+                            sync_id: gameData.syncId
+                        }));
 
-                updateBalance();
+                        updateSyncStatus('📤 Отправка...');
 
-                if (tg && tg.sendData) {
-                    tg.sendData(JSON.stringify({
-                        action: 'join_game',
-                        user_id: gameData.currentUser.id,
-                        username: gameData.currentUser.username,
-                        first_name: gameData.currentUser.first_name,
-                        photo_url: gameData.currentUser.photo_url,
-                        gifts: 1
-                    }));
-                }
+                        setTimeout(requestGameState, 500);
+                    }
 
-                if (tg) {
-                    tg.showAlert('Вы присоединились к игре!');
+                    if (tg) {
+                        tg.showAlert('Присоединяемся к игре...');
+                    }
                 } else {
-                    alert('Вы присоединились к игре!');
+                    if (tg) {
+                        tg.showAlert('Вы уже участвуете в этой игре!');
+                    }
                 }
             } else if (gameData.gameInProgress) {
-                const msg = 'Игра уже идет! Дождитесь следующей.';
                 if (tg) {
-                    tg.showAlert(msg);
-                } else {
-                    alert(msg);
-                }
-            } else if (gameData.userInGame) {
-                const msg = 'Вы уже участвуете в этой игре!';
-                if (tg) {
-                    tg.showAlert(msg);
-                } else {
-                    alert(msg);
+                    tg.showAlert('Игра уже идет! Дождитесь следующей.');
                 }
             } else {
-                const msg = 'У вас нет гифтов!';
                 if (tg) {
-                    tg.showAlert(msg);
-                } else {
-                    alert(msg);
+                    tg.showAlert('У вас нет гифтов!');
                 }
             }
         }
@@ -1173,6 +1191,10 @@
         function closeInventory() {
             document.getElementById('inventoryOverlay').style.display = 'none';
             setActiveNav(0);
+        }
+
+        function closeWinnerModal() {
+            document.getElementById('winnerModal').style.display = 'none';
         }
 
         function setActiveNav(index) {
