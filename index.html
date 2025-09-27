@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GiftRoller</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1421;
+            color: white;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Звезды на фоне */
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            justify-content: space-between;
+        }
+
+        /* Верхняя панель */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 30px;
+            padding: 10px 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .menu-icon {
+            width: 24px;
+            height: 24px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .gifts-count {
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .ton-balance {
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .search-icon {
+            width: 24px;
+            height: 24px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Основная рулетка */
+        .roulette-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 20px 0 40px 0;
+        }
+
+        .roulette-wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #ff4500;
+            position: relative;
+            transition: transform 4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 0 50px rgba(255, 69, 0, 0.4);
+        }
+
+        /* Центральный круг */
+        .center-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: #0d1421;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: white;
+            border: 4px solid #1a1a2e;
+            z-index: 3;
+        }
+
+        /* Указатель сверху */
+        .pointer {
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 25px solid white;
+            z-index: 4;
+        }
+
+        /* Аватар */
+        .avatar {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4a9eff, #0066cc);
+            border-radius: 50%;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .avatar-icon {
+            color: white;
+            font-size: 18px;
+        }
+
+        /* Кнопки */
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 340px;
+            margin-bottom: 30px;
+        }
+
+        .add-gifts-btn {
+            background: linear-gradient(135deg, #ffd700, #ffa500);
+            color: #000;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .add-gifts-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(255, 215, 0, 0.5);
+        }
+
+        .add-ton-btn {
+            background: rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.9);
+            padding: 16px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .add-ton-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Нижняя секция */
+        .bottom-section {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .players-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 10px;
+        }
+
+        .players-count {
+            font-size: 16px;
+            color: white;
+            font-weight: 500;
+        }
+
+        .game-id {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Нижняя навигация */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            padding: 8px;
+        }
+
+        .nav-item.active {
+            color: #ff4500;
+        }
+
+        .nav-item:hover {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .nav-icon {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .nav-text {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        /* Анимация вращения */
+        .spinning {
+            animation: spin 4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(1800deg); }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 400px) {
+            .container {
+                padding: 15px;
+            }
+
+            .roulette-container {
+                width: 280px;
+                height: 280px;
+            }
+
+            .buttons {
+                max-width: 320px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+
+    <div class="container">
+        <!-- Верхняя панель -->
+        <div class="header">
+            <div class="header-left">
+                <div class="menu-icon">⏰</div>
+                <span class="gifts-count">1ГИФТ</span>
+            </div>
+            <span class="ton-balance">1.63 TON</span>
+            <div class="search-icon">🔍</div>
+        </div>
+
+        <!-- Рулетка -->
+        <div class="roulette-container">
+            <div class="avatar">
+                <div class="avatar-icon">👤</div>
+            </div>
+            <div class="pointer"></div>
+            <div class="roulette-wheel" id="roulette">
+                <div class="center-circle">Ожидание</div>
+            </div>
+        </div>
+
+        <!-- Кнопки -->
+        <div class="buttons">
+            <button class="add-gifts-btn" onclick="addGifts()">
+                + Добавить Гифты
+            </button>
+            <button class="add-ton-btn" onclick="addTon()">
+                Добавить 0 TON
+            </button>
+        </div>
+
+        <!-- Нижняя информация -->
+        <div class="bottom-section">
+            <div class="players-info">
+                <span class="players-count">Игроков (1)</span>
+                <span class="game-id">ИГРА #121558</span>
+            </div>
+
+            <!-- Нижняя навигация -->
+            <div class="bottom-nav">
+                <a href="#" class="nav-item active">
+                    <div class="nav-icon">🎯</div>
+                    <div class="nav-text">ПвП</div>
+                </a>
+                <a href="#" class="nav-item">
+                    <div class="nav-icon">🎰</div>
+                    <div class="nav-text">Соло</div>
+                </a>
+                <a href="#" class="nav-item">
+                    <div class="nav-icon">📦</div>
+                    <div class="nav-text">Инвентарь</div>
+                </a>
+                <a href="#" class="nav-item">
+                    <div class="nav-icon">🏪</div>
+                    <div class="nav-text">Магазин</div>
+                </a>
+                <a href="#" class="nav-item">
+                    <div class="nav-icon">💰</div>
+                    <div class="nav-text">Заработок</div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Встроенный Telegram WebApp API
+        window.Telegram = window.Telegram || {};
+
+        window.Telegram.WebApp = {
+            initData: '',
+            initDataUnsafe: {},
+            version: '6.0',
+            platform: 'web',
+            colorScheme: 'dark',
+            themeParams: {
+                bg_color: '#0d1421',
+                text_color: '#ffffff',
+                hint_color: '#708499',
+                link_color: '#ff4500',
+                button_color: '#ff4500',
+                button_text_color: '#ffffff'
+            },
+            isExpanded: true,
+            viewportHeight: window.innerHeight,
+            viewportStableHeight: window.innerHeight,
+            isClosingConfirmationEnabled: false,
+            headerColor: '#0d1421',
+            backgroundColor: '#0d1421',
+
+            ready: function() {
+                console.log('Telegram WebApp ready');
+                this.isRealTelegram = !!(window.TelegramWebviewProxy || window.external || window.parent !== window);
+            },
+
+            expand: function() {
+                console.log('Telegram WebApp expand');
+                if (this.isRealTelegram && window.TelegramWebviewProxy) {
+                    window.TelegramWebviewProxy.postEvent('web_app_expand', '{}');
+                }
+            },
+
+            setHeaderColor: function(color) {
+                this.headerColor = color;
+                if (this.isRealTelegram && window.TelegramWebviewProxy) {
+                    window.TelegramWebviewProxy.postEvent('web_app_set_header_color', JSON.stringify({color: color}));
+                }
+            },
+
+            setBackgroundColor: function(color) {
+                this.backgroundColor = color;
+                if (this.isRealTelegram && window.TelegramWebviewProxy) {
+                    window.TelegramWebviewProxy.postEvent('web_app_set_background_color', JSON.stringify({color: color}));
+                }
+            },
+
+            showAlert: function(message, callback) {
+                if (this.isRealTelegram && window.TelegramWebviewProxy) {
+                    window.TelegramWebviewProxy.postEvent('web_app_open_popup', JSON.stringify({
+                        title: 'Уведомление',
+                        message: message,
+                        buttons: [{type: 'ok'}]
+                    }));
+                } else {
+                    alert(message);
+                }
+                if (callback) callback();
+            }
+        };
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+            window.Telegram.WebApp.setHeaderColor('#0d1421');
+            window.Telegram.WebApp.setBackgroundColor('#0d1421');
+
+            createStars();
+        });
+
+        // Создание звезд
+        function createStars() {
+            const starsContainer = document.querySelector('.stars');
+            for (let i = 0; i < 60; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = Math.random() * 2 + 1 + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Функции кнопок
+        function addGifts() {
+            window.Telegram.WebApp.showAlert('Функция добавления гифтов в разработке!');
+        }
+
+        function addTon() {
+            window.Telegram.WebApp.showAlert('Функция добавления TON в разработке!');
+        }
+
+        // Функция вращения рулетки
+        function spinRoulette() {
+            const roulette = document.getElementById('roulette');
+            roulette.classList.add('spinning');
+
+            setTimeout(() => {
+                roulette.classList.remove('spinning');
+                window.Telegram.WebApp.showAlert('Поздравляем! Вы выиграли приз!');
+            }, 4000);
+        }
+
+        // Клик по рулетке
+        document.getElementById('roulette').addEventListener('click', spinRoulette);
+
+        // Попытка загрузить внешний Telegram API
+        if (!window.TelegramWebviewProxy) {
+            const script = document.createElement('script');
+            script.src = 'https://telegram.org/js/telegram-web-app.js';
+            script.onload = function() {
+                if (window.Telegram && window.Telegram.WebApp) {
+                    window.Telegram.WebApp.ready();
+                    window.Telegram.WebApp.expand();
+                    window.Telegram.WebApp.setHeaderColor('#0d1421');
+                    window.Telegram.WebApp.setBackgroundColor('#0d1421');
+                }
+            };
+            document.head.appendChild(script);
+        }
+    </script>
+</body>
+</html>
