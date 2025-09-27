@@ -131,7 +131,6 @@
             color: rgba(255, 255, 255, 0.8);
         }
 
-        /* Рулетка с игроками */
         .roulette-container {
             position: relative;
             width: 300px;
@@ -171,7 +170,6 @@
             line-height: 1.2;
         }
 
-        /* Указатель как в оригинале */
         .pointer {
             position: absolute;
             top: -2px;
@@ -197,7 +195,6 @@
             border-radius: 50%;
         }
 
-        /* Аватарки игроков на рулетке */
         .player-avatar {
             position: absolute;
             width: 40px;
@@ -211,8 +208,15 @@
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
+            overflow: hidden;
+        }
+
+        .player-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .buttons {
@@ -254,7 +258,6 @@
             box-shadow: none;
         }
 
-        /* Список игроков внизу */
         .bottom-section {
             width: 100%;
             max-width: 400px;
@@ -310,6 +313,13 @@
             color: white;
             font-size: 14px;
             font-weight: 600;
+            overflow: hidden;
+        }
+
+        .player-avatar-small img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .player-info {
@@ -365,6 +375,115 @@
             font-weight: 500;
         }
 
+        /* Инвентарь */
+        .inventory-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+            backdrop-filter: blur(5px);
+        }
+
+        .inventory-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #0d1421;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .inventory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .inventory-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .inventory-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .inventory-content {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .empty-inventory {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .search-icon-large {
+            font-size: 80px;
+            color: rgba(255, 255, 255, 0.3);
+            margin-bottom: 10px;
+        }
+
+        .empty-message {
+            font-size: 24px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .transfer-link {
+            color: #4a9eff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .inventory-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .inventory-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .send-gifts-btn {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .go-shop-btn {
+            background: rgba(255, 255, 255, 0.9);
+            color: #0d1421;
+        }
+
         /* Модальное окно победителя */
         .winner-modal {
             position: fixed;
@@ -409,6 +528,13 @@
             font-weight: 600;
             margin: 0 auto 15px;
             border: 4px solid #4CAF50;
+            overflow: hidden;
+        }
+
+        .winner-avatar-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .winner-name {
@@ -538,25 +664,50 @@
             </div>
 
             <div class="bottom-nav">
-                <div class="nav-item active">
+                <div class="nav-item active" onclick="setActiveNav(0)">
                     <div class="nav-icon">🎯</div>
                     <div class="nav-text">ПвП</div>
                 </div>
-                <div class="nav-item">
+                <div class="nav-item" onclick="setActiveNav(1)">
                     <div class="nav-icon">🎰</div>
                     <div class="nav-text">Соло</div>
                 </div>
-                <div class="nav-item">
+                <div class="nav-item" onclick="showInventory()">
                     <div class="nav-icon">📦</div>
                     <div class="nav-text">Инвентарь</div>
                 </div>
-                <div class="nav-item">
+                <div class="nav-item" onclick="setActiveNav(3)">
                     <div class="nav-icon">🏪</div>
                     <div class="nav-text">Магазин</div>
                 </div>
-                <div class="nav-item">
+                <div class="nav-item" onclick="setActiveNav(4)">
                     <div class="nav-icon">💰</div>
                     <div class="nav-text">Заработок</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Инвентарь -->
+    <div class="inventory-overlay" id="inventoryOverlay">
+        <div class="inventory-container">
+            <div class="inventory-header">
+                <h2 class="inventory-title">Инвентарь</h2>
+                <button class="inventory-close" onclick="closeInventory()">×</button>
+            </div>
+            <div class="inventory-content">
+                <div class="empty-inventory">
+                    <div class="search-icon-large">🔍</div>
+                    <div class="empty-message">
+                        Гифтов пока нет.<br>
+                        Купи один в нашем<br>
+                        магазине или отправь<br>
+                        на <a href="#" class="transfer-link">@rolls_transfer</a>
+                    </div>
+                    <div class="inventory-buttons">
+                        <button class="inventory-btn send-gifts-btn">Отправить гифты</button>
+                        <button class="inventory-btn go-shop-btn" onclick="closeInventory()">Перейти в магазин</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -566,7 +717,9 @@
     <div class="winner-modal" id="winnerModal">
         <div class="winner-container fade-in">
             <div class="winner-title" id="winnerGameId">Игра #121642</div>
-            <div class="winner-avatar-large" id="winnerAvatar">👤</div>
+            <div class="winner-avatar-large" id="winnerAvatar">
+                <span id="winnerAvatarText">👤</span>
+            </div>
             <div class="winner-name" id="winnerName">@username</div>
             <div class="winner-prize" id="winnerPrize">Выиграл 7.61 TON</div>
             <div class="winner-items">
@@ -581,9 +734,22 @@
         // Telegram WebApp API
         window.Telegram = window.Telegram || {};
         window.Telegram.WebApp = {
-            ready: function() { console.log('WebApp ready'); },
+            initData: '',
+            initDataUnsafe: {},
+            ready: function() { 
+                console.log('WebApp ready');
+                // Получаем данные пользователя из Telegram
+                if (this.initDataUnsafe && this.initDataUnsafe.user) {
+                    gameData.currentUser = this.initDataUnsafe.user;
+                    updateUserInfo();
+                }
+            },
             expand: function() { console.log('WebApp expand'); },
-            showAlert: function(message) { alert(message); }
+            showAlert: function(message) { alert(message); },
+            sendData: function(data) {
+                console.log('Sending data to bot:', data);
+                // Здесь отправляем данные боту
+            }
         };
 
         // Игровые данные
@@ -597,7 +763,13 @@
             gameTimer: 30,
             gameInProgress: false,
             userInGame: false,
-            colors: ['#ff4500', '#9c27b0', '#2196f3', '#4caf50', '#ff9800', '#e91e63']
+            colors: ['#ff4500', '#9c27b0', '#2196f3', '#4caf50', '#ff9800', '#e91e63'],
+            currentUser: {
+                id: 1,
+                first_name: 'User',
+                username: 'username',
+                photo_url: null
+            }
         };
 
         let timers = {
@@ -606,14 +778,24 @@
 
         // Инициализация
         document.addEventListener('DOMContentLoaded', function() {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+
             createStars();
             updateBalance();
             updateGameInfo();
 
-            // Симуляция игроков для демо
-            setTimeout(() => addPlayer('Bamboo4ek', 2, 1), 2000);
-            setTimeout(() => addPlayer('TestUser', 1, 2), 4000);
+            // Попытка получить данные пользователя из Telegram
+            if (window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+                gameData.currentUser = window.Telegram.WebApp.initDataUnsafe.user;
+                updateUserInfo();
+            }
         });
+
+        // Обновление информации пользователя
+        function updateUserInfo() {
+            console.log('Current user:', gameData.currentUser);
+        }
 
         // Создание звезд
         function createStars() {
@@ -648,15 +830,17 @@
             }
         }
 
-        // Добавление игрока
-        function addPlayer(username, gifts, playerId) {
-            if (gameData.players.find(p => p.username === username)) return;
+        // Добавление реального игрока
+        function addRealPlayer(userData, gifts) {
+            if (gameData.players.find(p => p.id === userData.id)) return;
 
             const player = {
-                id: playerId || gameData.players.length + 1,
-                username: username,
+                id: userData.id,
+                username: userData.username || userData.first_name,
+                first_name: userData.first_name,
+                photo_url: userData.photo_url,
                 gifts: gifts,
-                bet: gifts * 1.0, // 1 гифт = 1 TON
+                bet: gifts * 1.0,
                 color: gameData.colors[gameData.players.length % gameData.colors.length]
             };
 
@@ -667,7 +851,7 @@
             updatePlayersList();
             updateRoulette();
 
-            // Если стало 2+ игроков, запускаем таймер
+            // Запускаем таймер только при 2+ игроков
             if (gameData.players.length >= 2 && !gameData.gameInProgress) {
                 startGameTimer();
             }
@@ -678,10 +862,12 @@
             document.getElementById('bankTotal').textContent = `Банк: ${gameData.gameBank.toFixed(2)} TON`;
             document.getElementById('playersCount').textContent = `Игроков (${gameData.players.length})`;
 
-            if (gameData.players.length < 2) {
+            if (gameData.players.length === 0) {
                 document.getElementById('participantsInfo').textContent = 'Нужно минимум 2 игрока';
+            } else if (gameData.players.length === 1) {
+                document.getElementById('participantsInfo').textContent = 'Ждем еще одного игрока...';
             } else {
-                const userPlayer = gameData.players.find(p => p.username === 'Вы');
+                const userPlayer = gameData.players.find(p => p.id === gameData.currentUser.id);
                 if (userPlayer) {
                     const chance = Math.round((userPlayer.bet / gameData.gameBank) * 100);
                     document.getElementById('participantsInfo').textContent = `Ваш шанс: ${chance}%`;
@@ -701,9 +887,14 @@
 
                 const playerItem = document.createElement('div');
                 playerItem.className = 'player-item';
+
+                const avatarHtml = player.photo_url ? 
+                    `<img src="${player.photo_url}" alt="${player.first_name}">` :
+                    player.first_name.charAt(0).toUpperCase();
+
                 playerItem.innerHTML = `
                     <div class="player-avatar-small" style="background-color: ${player.color}">
-                        ${player.username.charAt(0).toUpperCase()}
+                        ${avatarHtml}
                     </div>
                     <div class="player-info">
                         <div class="player-name">@${player.username}</div>
@@ -751,10 +942,15 @@
                 const avatar = document.createElement('div');
                 avatar.className = 'player-avatar';
                 avatar.style.backgroundColor = player.color;
-                avatar.textContent = player.username.charAt(0).toUpperCase();
+
+                if (player.photo_url) {
+                    avatar.innerHTML = `<img src="${player.photo_url}" alt="${player.first_name}">`;
+                } else {
+                    avatar.textContent = player.first_name.charAt(0).toUpperCase();
+                }
 
                 // Позиционируем аватарку на рулетке
-                const radius = 110; // Радиус размещения аватарок
+                const radius = 110;
                 const x = Math.cos((avatarAngle - 90) * Math.PI / 180) * radius;
                 const y = Math.sin((avatarAngle - 90) * Math.PI / 180) * radius;
 
@@ -774,7 +970,7 @@
             timers.gameTimer = setInterval(() => {
                 if (gameData.gameTimer > 0) {
                     document.getElementById('gameTimer').textContent = `Старт через: ${gameData.gameTimer}с`;
-                    document.getElementById('centerText').innerHTML = `${gameData.gameTimer}с`;
+                    document.getElementById('centerText').innerHTML = `Старт<br>через<br>${gameData.gameTimer}с`;
                     gameData.gameTimer--;
                 } else {
                     clearInterval(timers.gameTimer);
@@ -787,10 +983,8 @@
         function startRouletteSpin() {
             const roulette = document.getElementById('roulette');
 
-            // Определяем победителя
             const winner = determineWinner();
 
-            // Вычисляем угол для остановки на победителе
             let targetAngle = 0;
             let currentAngle = 0;
 
@@ -806,7 +1000,6 @@
                 currentAngle += angleSpan;
             }
 
-            // Добавляем несколько полных оборотов + точный угол
             const spinDegrees = 1800 + (360 - targetAngle);
 
             roulette.style.setProperty('--spin-degrees', spinDegrees + 'deg');
@@ -834,23 +1027,22 @@
                 }
             }
 
-            return gameData.players[0]; // Fallback
+            return gameData.players[0];
         }
 
         // Завершение игры
         function endGame(winner) {
             const prize = gameData.gameBank;
 
-            // Показываем модальное окно победителя
             showWinnerModal(winner, prize);
 
-            // Если это пользователь, обновляем баланс
-            if (winner.username === 'Вы') {
+            // Если это текущий пользователь, обновляем баланс
+            if (winner.id === gameData.currentUser.id) {
                 gameData.ton += prize;
+                gameData.gifts += winner.gifts; // Возвращаем удвоенные гифты
                 window.Telegram.WebApp.showAlert(`🎉 Вы выиграли ${prize.toFixed(2)} TON!`);
             }
 
-            // Сброс игры
             setTimeout(() => {
                 resetGame();
             }, 5000);
@@ -859,8 +1051,16 @@
         // Показ модального окна победителя
         function showWinnerModal(winner, prize) {
             document.getElementById('winnerGameId').textContent = `Игра #${gameData.gameId}`;
-            document.getElementById('winnerAvatar').textContent = winner.username.charAt(0).toUpperCase();
-            document.getElementById('winnerAvatar').style.backgroundColor = winner.color;
+
+            const winnerAvatar = document.getElementById('winnerAvatar');
+            winnerAvatar.style.backgroundColor = winner.color;
+
+            if (winner.photo_url) {
+                winnerAvatar.innerHTML = `<img src="${winner.photo_url}" alt="${winner.first_name}">`;
+            } else {
+                document.getElementById('winnerAvatarText').textContent = winner.first_name.charAt(0).toUpperCase();
+            }
+
             document.getElementById('winnerName').textContent = `@${winner.username}`;
             document.getElementById('winnerPrize').textContent = `Выиграл ${prize.toFixed(2)} TON`;
 
@@ -880,7 +1080,6 @@
             gameData.userInGame = false;
             gameData.gameTimer = 30;
 
-            // Увеличиваем номер игры
             gameData.gameId += Math.floor(Math.random() * 10) + 1;
             document.getElementById('gameId').textContent = `ИГРА #${gameData.gameId}`;
 
@@ -899,10 +1098,21 @@
         function addGifts() {
             if (gameData.gifts > 0 && !gameData.userInGame && !gameData.gameInProgress) {
                 gameData.userInGame = true;
-                addPlayer('Вы', 1, 999);
-
                 gameData.gifts -= 1;
+
+                // Добавляем реального пользователя
+                addRealPlayer(gameData.currentUser, 1);
+
                 updateBalance();
+
+                // Отправляем данные боту
+                if (window.Telegram.WebApp.sendData) {
+                    window.Telegram.WebApp.sendData(JSON.stringify({
+                        action: 'join_game',
+                        user_id: gameData.currentUser.id,
+                        gifts: 1
+                    }));
+                }
 
                 window.Telegram.WebApp.showAlert('Вы присоединились к игре!');
             } else if (gameData.gameInProgress) {
@@ -914,8 +1124,44 @@
             }
         }
 
+        // Инвентарь
+        function showInventory() {
+            document.getElementById('inventoryOverlay').style.display = 'block';
+            setActiveNav(2);
+        }
+
+        function closeInventory() {
+            document.getElementById('inventoryOverlay').style.display = 'none';
+            setActiveNav(0); // Возвращаемся к ПвП
+        }
+
+        // Навигация
+        function setActiveNav(index) {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach((item, i) => {
+                if (i === index) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
         // Клик по рулетке
         document.getElementById('roulette').addEventListener('click', addGifts);
+
+        // Попытка загрузить внешний Telegram API
+        if (!window.TelegramWebviewProxy) {
+            const script = document.createElement('script');
+            script.src = 'https://telegram.org/js/telegram-web-app.js';
+            script.onload = function() {
+                if (window.Telegram && window.Telegram.WebApp) {
+                    window.Telegram.WebApp.ready();
+                    window.Telegram.WebApp.expand();
+                }
+            };
+            document.head.appendChild(script);
+        }
     </script>
 </body>
 </html>
