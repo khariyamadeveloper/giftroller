@@ -4,30 +4,40 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Securedcoder — Портфолио</title>
-  <link href="https://fonts.googleapis.com/css?family=Montserrat:700,900|Inter:400,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:800,900|Inter:400,700&display=swap" rel="stylesheet">
+  <!-- tsParticles CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@3/tsparticles.bundle.min.js"></script>
   <style>
     :root {
       --violet: #7c3cff;
-      --purple-bg: #181527;
-      --neutral: #202035;
-      --white: #f3f3ff;
       --accent: #00f6ff;
-      --card: #23203a;
+      --bg-dark: #23212b;
+      --card-bg: #23203a;
       --border: #302856;
+      --white: #f3f3ff;
       --radius: 22px;
     }
     body {
       margin: 0;
-      min-height: 100vh;
       font-family: 'Inter', Arial, sans-serif;
-      background: linear-gradient(135deg, var(--purple-bg) 65%, var(--violet) 120%);
+      min-height: 100vh;
+      background: var(--bg-dark);
       color: var(--white);
-      transition: background 0.3s;
+      overflow-x: hidden;
     }
-    .container {
+    #particles-bg {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      background: transparent;
+    }
+    .main-content {
+      position: relative;
+      z-index: 2;
       max-width: 800px;
-      margin: 60px auto 0 auto;
-      padding: 0 30px;
+      margin: 70px auto 0 auto;
+      padding: 0 32px;
     }
     header {
       text-align: left;
@@ -42,24 +52,25 @@
       margin-bottom: 7px;
     }
     .subtitle {
-      font-size: 1.19rem;
+      font-size: 1.18rem;
       color: var(--accent);
       font-weight: 700;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
     .description {
-      font-size: 1.11rem;
+      font-size: 1.12rem;
       color: #d0cdf6;
       margin-bottom: 32px;
       line-height: 1.8;
     }
-    .portfolio-section {
+    .portfolio-grid {
       display: grid;
       gap: 24px;
       grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      margin-bottom: 38px;
     }
     .portfolio-card {
-      background: var(--card);
+      background: var(--card-bg);
       border: 1.5px solid var(--border);
       border-radius: var(--radius);
       padding: 30px 26px;
@@ -75,25 +86,25 @@
     }
     .portfolio-title {
       font-family: 'Montserrat', sans-serif;
-      font-size: 1.35rem;
+      font-size: 1.34rem;
       font-weight: bold;
       color: var(--accent);
-      margin-bottom: 8px;
+      margin-bottom: 7px;
     }
     .portfolio-desc {
       color: var(--white);
-      font-size: 1.03rem;
-      opacity: 0.92;
+      font-size: 1.05rem;
+      opacity: 0.93;
     }
     .contact-bar {
-      margin-top: 40px;
       text-align: center;
+      margin-bottom: 32px;
     }
     .tg-btn {
       background: linear-gradient(90deg, var(--violet), var(--accent));
-      color: var(--purple-bg);
+      color: var(--bg-dark);
       border: none;
-      font-size: 1.1rem;
+      font-size: 1.13rem;
       font-weight: 700;
       padding: 15px 46px;
       border-radius: 19px;
@@ -107,16 +118,18 @@
       box-shadow: 0 7px 30px rgba(124,60,255,0.29);
     }
     .footer {
-      margin-top: 48px;
       text-align: center;
       color: #9980d6;
       font-size: .96rem;
-      opacity: 0.72;
+      opacity: 0.74;
+      margin-top: 2.5em;
+      padding-bottom: 1em;
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div id="particles-bg"></div>
+  <div class="main-content">
     <header>
       <div class="username">Securedcoder</div>
       <div class="subtitle">17 лет — программист, более 2 лет опыта</div>
@@ -125,43 +138,75 @@
       </div>
     </header>
     <main>
-      <section class="portfolio-section">
+      <section class="portfolio-grid">
         <div class="portfolio-card">
           <div class="portfolio-title">🚀 Cтатичные сайты</div>
-          <div class="portfolio-desc">Сложные, современные и быстрые лендинги и сайты-визитки на лучших технологиях с уникальным стилем.</div>
+          <div class="portfolio-desc">Современные одностраничники и сайты-визитки с уникальным дизайном.</div>
         </div>
         <div class="portfolio-card">
-          <div class="portfolio-title">🤖 Telegram / Discord Боты</div>
-          <div class="portfolio-desc">Автоматизация, чаты, админ-инструменты, интеграции с платёжными и внешними сервисами, развитие сообществ.</div>
+          <div class="portfolio-title">🤖 Telegram / Discord боты</div>
+          <div class="portfolio-desc">Автоматизация, админ-инструменты, интеграция API и платёжных сервисов.</div>
         </div>
         <div class="portfolio-card">
           <div class="portfolio-title">🛠 Desktop & Web ПО</div>
-          <div class="portfolio-desc">Утилиты, микросервисы, desktop-приложения и расширения. Внедрение API, обработка данных, автоматизация процессов.</div>
+          <div class="portfolio-desc">Утилиты, микросервисы, десктоп-приложения, обработка и автоматизация данных.</div>
         </div>
         <div class="portfolio-card">
           <div class="portfolio-title">🔬 Парсеры и анализаторы</div>
-          <div class="portfolio-desc">Сбор и обработка данных из различных источников, создание автоматических скриптов.</div>
+          <div class="portfolio-desc">Сбор и обработка данных, автоматические скрипты для разных платформ.</div>
         </div>
         <div class="portfolio-card">
           <div class="portfolio-title">🕹 Модификации для игр</div>
-          <div class="portfolio-desc">Моды для Minecraft, Roblox и других игр, включая автоматизацию, расширение функционала и улучшение геймплея.</div>
+          <div class="portfolio-desc">Моды для Minecraft, Roblox и других игр: расширение, автоматизация, фичи.</div>
         </div>
         <div class="portfolio-card">
           <div class="portfolio-title">📡 Микроконтроллеры</div>
-          <div class="portfolio-desc">Аппаратные проекты: Arduino, ESP32, IoT, робототехника и интеграция электроники с ПО.</div>
+          <div class="portfolio-desc">Arduino, ESP32, роботы и IoT проекты, интеграция электроники с ПО.</div>
         </div>
         <div class="portfolio-card">
           <div class="portfolio-title">🔒 Безопасность & реверс</div>
-          <div class="portfolio-desc">Анализ ПО, защита данных, обратное проектирование и исследование в сфере информационной безопасности.</div>
+          <div class="portfolio-desc">Анализ ПО, защита данных, реверс инжиниринг, безопасность приложений.</div>
         </div>
       </section>
       <div class="contact-bar">
         <button class="tg-btn" onclick="window.open('https://t.me/securedcoder', '_blank')">Связаться в Telegram</button>
       </div>
-      <div class="footer">
-        &copy; 2025 — Portfolio by Securedcoder
-      </div>
     </main>
+    <div class="footer">
+      &copy; 2025 — Portfolio by Securedcoder
+    </div>
   </div>
+  <!-- tsParticles настройка -->
+  <script>
+  tsParticles.load("particles-bg", {
+    background: { color: "#23212b" },
+    fpsLimit: 60,
+    particles: {
+      number: { value: 55, density: { enable: true, value_area: 950 } },
+      color: { value: "#fff" },
+      opacity: { value: 0.51, random: true },
+      size: { value: 2.35, random: true },
+      move: {
+        enable: true,
+        speed: 0.38,
+        direction: "none",
+        random: false,
+        straight: false,
+        outModes: { default: "out" }
+      },
+      links: {
+        enable: true,
+        distance: 140,
+        color: "#fff",
+        opacity: 0.24,
+        width: 1
+      }
+    },
+    interactivity: {
+      events: { onhover: { enable: false }, onclick: { enable: false }, resize: true }
+    },
+    detectRetina: true
+  });
+  </script>
 </body>
 </html>
