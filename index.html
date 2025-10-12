@@ -3,119 +3,165 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Портфолио Securedcoder</title>
+  <title>Securedcoder — Портфолио</title>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:700,900|Inter:400,700&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400;700&display=swap');
     :root {
-      --bg: #181022;
-      --violet: #8b53ff;
-      --purple-dark: #2d0c44;
+      --violet: #7c3cff;
+      --purple-bg: #181527;
+      --neutral: #202035;
+      --white: #f3f3ff;
       --accent: #00f6ff;
-      --text: #f2f1ff;
+      --card: #23203a;
+      --border: #302856;
+      --radius: 22px;
     }
     body {
       margin: 0;
-      padding: 0;
-      background: linear-gradient(135deg, var(--bg) 70%, var(--purple-dark) 100%);
-      color: var(--text);
-      font-family: 'Roboto', Arial, sans-serif;
       min-height: 100vh;
+      font-family: 'Inter', Arial, sans-serif;
+      background: linear-gradient(135deg, var(--purple-bg) 65%, var(--violet) 120%);
+      color: var(--white);
+      transition: background 0.3s;
     }
     .container {
-      max-width: 500px;
-      margin: 60px auto;
-      background: rgba(34,20,63,0.7);
-      border-radius: 22px;
-      box-shadow: 0 8px 32px 0 rgba(0,0,0,0.35);
-      padding: 42px 36px;
-      text-align: center;
+      max-width: 800px;
+      margin: 60px auto 0 auto;
+      padding: 0 30px;
     }
-    h1 {
-      color: var(--violet);
+    header {
+      text-align: left;
+      margin-bottom: 42px;
+    }
+    .username {
       font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
       font-size: 2.7rem;
-      margin-bottom: 16px;
-      letter-spacing: 2px;
+      color: var(--violet);
+      letter-spacing: 3px;
+      margin-bottom: 7px;
     }
     .subtitle {
-      font-size: 1.3rem;
+      font-size: 1.19rem;
       color: var(--accent);
-      margin-bottom: 28px;
+      font-weight: 700;
+      margin-bottom: 10px;
     }
-    .about {
-      background: rgba(139,83,255,0.09);
-      padding: 18px 0;
-      border-radius: 16px;
-      margin-bottom: 25px;
-      font-size: 1.1rem;
-      line-height: 1.7;
+    .description {
+      font-size: 1.11rem;
+      color: #d0cdf6;
+      margin-bottom: 32px;
+      line-height: 1.8;
     }
-    .skills {
-      margin: 0 0 30px 0;
-      padding: 0;
-      text-align: left;
-      display: inline-block;
+    .portfolio-section {
+      display: grid;
+      gap: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
     }
-    .skills li {
-      margin: 13px 0;
-      list-style: none;
-      font-size: 1.08rem;
-      background: linear-gradient(90deg, var(--violet), var(--purple-dark));
-      color: #fff;
-      padding: 10px 18px;
-      border-radius: 10px;
-      font-weight: 500;
-      box-shadow: 0 2px 6px rgba(139,83,255,0.17);
+    .portfolio-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 30px 26px;
+      box-shadow: 0 6px 28px 0 rgba(124,60,255, 0.09);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      transition: box-shadow 0.2s, border-color 0.2s;
     }
-    .contact-btn {
-      background: linear-gradient(90deg, var(--accent), var(--violet));
-      color: var(--bg);
-      border: none;
-      outline: none;
-      border-radius: 14px;
-      padding: 14px 40px;
-      font-size: 1.17rem;
+    .portfolio-card:hover {
+      box-shadow: 0 14px 44px 3px rgba(0,246,255,0.15);
+      border-color: var(--accent);
+    }
+    .portfolio-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.35rem;
       font-weight: bold;
-      cursor: pointer;
-      transition: transform 0.18s, box-shadow 0.18s;
-      box-shadow: 0 4px 14px rgba(139,83,255,0.21);
-      margin-top: 14px;
+      color: var(--accent);
+      margin-bottom: 8px;
     }
-    .contact-btn:hover {
-      transform: scale(1.09);
-      box-shadow: 0 8px 20px rgba(0,246,255,0.33);
+    .portfolio-desc {
+      color: var(--white);
+      font-size: 1.03rem;
+      opacity: 0.92;
+    }
+    .contact-bar {
+      margin-top: 40px;
+      text-align: center;
+    }
+    .tg-btn {
+      background: linear-gradient(90deg, var(--violet), var(--accent));
+      color: var(--purple-bg);
+      border: none;
+      font-size: 1.1rem;
+      font-weight: 700;
+      padding: 15px 46px;
+      border-radius: 19px;
+      cursor: pointer;
+      box-shadow: 0 3px 19px rgba(0,246,255,0.18);
+      transition: transform 0.13s, box-shadow 0.18s;
+      letter-spacing: 1px;
+    }
+    .tg-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 7px 30px rgba(124,60,255,0.29);
     }
     .footer {
-      margin-top: 32px;
-      font-size: 0.95rem;
-      color: #ac9edb;
-      opacity: 0.75;
+      margin-top: 48px;
+      text-align: center;
+      color: #9980d6;
+      font-size: .96rem;
+      opacity: 0.72;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Securedcoder</h1>
-    <div class="subtitle">17 лет &mdash; Кодер, программист</div>
-    <div class="about">
-      🧑‍💻 Занимаюсь разработкой уже более <b>2-х лет</b>.  
-      <br>
-      <br>
-      Я специализируюсь на создании различных IT-решений:
-    </div>
-    <ul class="skills">
-      <li>🚀 Cтатичные сайты с красивым и современным дизайном</li>
-      <li>🤖 Телеграмм и Discord боты (автоматизация, админ инструменты, взаимодействие с API и платежами)</li>
-      <li>🛠 Различное ПО: desktop, web, микросервисы, автоматизация процессов</li>
-      <li>🔬 Парсеры, анализаторы, скрипты для обработки данных</li>
-      <li>🕹 Модификации для игр (Minecraft, Roblox и др.)</li>
-      <li>📡 Аппаратные проекты на микроконтроллерах (Arduino, ESP32 и др.)</li>
-      <li>🔒 Безопасность, обратное проектирование и анализ ПО</li>
-    </ul>
-    <button class="contact-btn" onclick="window.open('https://t.me/securedcoder', '_blank')">Связаться в Telegram</button>
-    <div class="footer">
-      Портфолио | Securedcoder &copy; 2025
-    </div>
+    <header>
+      <div class="username">Securedcoder</div>
+      <div class="subtitle">17 лет — программист, более 2 лет опыта</div>
+      <div class="description">
+        Я специализируюсь на разработке современных цифровых решений и автоматизации. Разрабатываю сайты, телеграм/дискорд-боты, десктопные приложения, скрипты и парсеры, а также занимаюсь обратным проектированием и обеспечением безопасности. Работаю c разными технологиями: web, desktop, микроконтроллеры, API и интеграции.
+      </div>
+    </header>
+    <main>
+      <section class="portfolio-section">
+        <div class="portfolio-card">
+          <div class="portfolio-title">🚀 Cтатичные сайты</div>
+          <div class="portfolio-desc">Сложные, современные и быстрые лендинги и сайты-визитки на лучших технологиях с уникальным стилем.</div>
+        </div>
+        <div class="portfolio-card">
+          <div class="portfolio-title">🤖 Telegram / Discord Боты</div>
+          <div class="portfolio-desc">Автоматизация, чаты, админ-инструменты, интеграции с платёжными и внешними сервисами, развитие сообществ.</div>
+        </div>
+        <div class="portfolio-card">
+          <div class="portfolio-title">🛠 Desktop & Web ПО</div>
+          <div class="portfolio-desc">Утилиты, микросервисы, desktop-приложения и расширения. Внедрение API, обработка данных, автоматизация процессов.</div>
+        </div>
+        <div class="portfolio-card">
+          <div class="portfolio-title">🔬 Парсеры и анализаторы</div>
+          <div class="portfolio-desc">Сбор и обработка данных из различных источников, создание автоматических скриптов.</div>
+        </div>
+        <div class="portfolio-card">
+          <div class="portfolio-title">🕹 Модификации для игр</div>
+          <div class="portfolio-desc">Моды для Minecraft, Roblox и других игр, включая автоматизацию, расширение функционала и улучшение геймплея.</div>
+        </div>
+        <div class="portfolio-card">
+          <div class="portfolio-title">📡 Микроконтроллеры</div>
+          <div class="portfolio-desc">Аппаратные проекты: Arduino, ESP32, IoT, робототехника и интеграция электроники с ПО.</div>
+        </div>
+        <div class="portfolio-card">
+          <div class="portfolio-title">🔒 Безопасность & реверс</div>
+          <div class="portfolio-desc">Анализ ПО, защита данных, обратное проектирование и исследование в сфере информационной безопасности.</div>
+        </div>
+      </section>
+      <div class="contact-bar">
+        <button class="tg-btn" onclick="window.open('https://t.me/securedcoder', '_blank')">Связаться в Telegram</button>
+      </div>
+      <div class="footer">
+        &copy; 2025 — Portfolio by Securedcoder
+      </div>
+    </main>
   </div>
 </body>
 </html>
